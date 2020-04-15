@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
     } else {
         FILE *my_file = fopen(argv[1], "r");
         if (!my_file) {
-            printf("I can't open a.snazzle.file!");
+            printf("I can't open file!");
             return -1;
         }
         yyin = my_file;
