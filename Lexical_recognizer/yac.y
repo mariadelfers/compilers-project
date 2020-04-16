@@ -20,7 +20,7 @@ int yyerror(char const * s);
 %start program
 %%
 
-program : PROGRAM ID optional_statements END {printf("Accepted!\n"); return 0;}
+program : PROGRAM ID optional_statements {printf("Accepted!\n"); return 0;}
         ;
 
 optional_statements :   OPEN_BRACKET CLOSE_BRACKET
