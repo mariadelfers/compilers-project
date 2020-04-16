@@ -1,0 +1,7 @@
+program cuatro
+{
+  set x 2;
+  set y 3;
+  if (x < 2)
+     set z x*y;
+}

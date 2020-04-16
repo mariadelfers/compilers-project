@@ -1,0 +1,2 @@
+program dos
+set x 2 + y;

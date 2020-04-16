@@ -1,0 +1,5 @@
+program cuatro
+{
+  if (x < 2)
+     set z x*y; ;
+}

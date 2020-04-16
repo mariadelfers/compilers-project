@@ -1,0 +1,16 @@
+program cinco
+{
+   set x 2;
+   set x 3;
+   ifelse (x < 2)
+   {
+      set x y * z;
+      set y x * z;
+   }
+   {
+      set y x * 2;
+      set z y + 1;
+      if (x < y)
+        set z 3; ;
+   };
+}

@@ -1,0 +1,6 @@
+program tres
+{
+  set x 3;
+  set y 2;
+  set z x+y;
+}
