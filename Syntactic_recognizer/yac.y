@@ -34,9 +34,11 @@ struct SymbolTable *first, *last;
 int size = 0;
 int flag_1 = 0;
 int flag_2 = 0;
-void insert(char*, char*);
+void insert_name(char*, char*);
+void insert_type(char*);
 void display();
 void search(char name_tmp[]);
+void check(char name_tmp[]);
 %}
 
 /* Tokens from lex.l */
@@ -60,9 +62,9 @@ declarations : declaration SEMICOLON declarations
 			 | declaration
 			 ;
 
-declaration : VAR id_save TWO_POINTS type ;
+declaration : VAR id_save TWO_POINTS type {insert_type(yytext);} ;
 
-id_save : ID {insert(yytext,"-"); if(flag_1 == 1) return 0;} ;
+id_save : ID {insert_name(yytext,"-"); if(flag_1 == 1) return 0;} ;
 
 type : INT
      | FLOAT
@@ -79,7 +81,7 @@ assign_statement : SET id_check expresion SEMICOLON
 				 | PRINT expresion SEMICOLON
 				 ;
 
-id_check : ID {search(yytext); if(flag_2 == 0) printf("' %s ' doesn't exist.", yytext); return 0;} ;
+id_check : ID {check(yytext); if(flag_2 == 0) return 0;} ;
 
 if_statement : IF OPEN_PARENTHESES comparison CLOSE_PARENTHESES statement
 	     	 | IF_ELSE OPEN_PARENTHESES comparison CLOSE_PARENTHESES statement statement
@@ -140,6 +142,7 @@ int main(int argc, char *argv[]) {
         }
         yyin = my_file;
         yyparse();
+		//printf("%d, %d", flag_1, flag_2);
 		if (flag_1 == 0 && flag_2 == 1){
 			display();
 		}
@@ -155,7 +158,7 @@ int main(int argc, char *argv[]) {
 	exist in the table. If name does not exist, space is 
 	allocated for a struct and added to	the table.
 */
-void insert(char *var_name, char* var_type){
+void insert_name(char *var_name, char* var_type){
 	
 	search(var_name);
 	if (flag_1 == 0){
@@ -182,6 +185,9 @@ void insert(char *var_name, char* var_type){
 	}
 	//printf("\n\tVariable inserted.\n");
 }
+void insert_type(char* var_type){
+		strcpy(last->type, var_type);
+}
 /* 
 	Display() function: 
 	Print the entire symbol table in the current state.
@@ -205,19 +211,33 @@ void display(){
 	symbol table. 
 */
 void search(char name_tmp[]){
-	flag_2 = 0;	
 	int i = 0;
 	struct SymbolTable *p;
 	p = first;
 	for(i = 0; i < size; i++){
 		if(strcmp(p->name, name_tmp) == 0){
 			flag_1 = 1;
-			flag_2 = 1;	
 			break;
 		}
 		p = p->next;
 	}
 }
+void check(char name_tmp[]){
+	flag_2 = 0;	
+	int i = 0;
+	struct SymbolTable *p;
+	p = first;
+	for(i = 0; i < size; i++){
+		if(strcmp(p->name, name_tmp) == 0){
+			flag_2 = 1;	
+		}
+		p = p->next;
+	}
+	if(flag_2 == 0){
+		printf("' %s ' doesn't exist.", name_tmp);	
+	}
+}
+
 
 
 
