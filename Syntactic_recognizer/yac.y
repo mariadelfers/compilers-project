@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
+#include <assert.h>
 
 /*	Lex functions  */
 FILE extern *yyin;
@@ -22,118 +23,144 @@ char extern *yytext;
 int yylineno;
 int yylex();
 int yyerror(char const * s);
+float ftype;
 
-/* Symbol table structure */
-struct SymbolTable{
-	char name[10], type[10];
-	struct SymbolTable *next;
-};
-struct SymbolTable *first, *last;
-
-/* Symbol table functions */
+/* Symbol table variables & functions */
 int size = 0;
 int flag_1 = 0;
 int flag_2 = 0;
-void insert_name(char*, char*);
-void insert_type(char*);
+int flag_3 = 0;
+void insert(char*, char*);
 void display();
 void search(char name_tmp[]);
-void check(char name_tmp[]);
+void check_table(char name_tmp[]);
+void check_type(char*, char*);
 %}
 
-/* Tokens from lex.l */
 %start program
-%token PROGRAM END ID VAR INT FLOAT READ PRINT FOR SET TO STEP DO NUM_INT NUM_FLOAT
-%token OPEN_BRACKET CLOSE_BRACKET SEMICOLON TWO_POINTS OPEN_PARENTHESES CLOSE_PARENTHESES 
+%union{
+	int itype;
+	float ftype;
+	char* idtype;	
+	char* s_type;	
+	struct SymbolTable* st_type;	
+}
+
+/* Tokens */
+%token PROGRAM END VAR ID INT FLOAT NUM_INT NUM_FLOAT
+%token READ PRINT FOR SET TO STEP DO
+%token OPEN_BRACKET CLOSE_BRACKET SEMICOLON TWO_POINTS 
+%token OPEN_PARENTHESES CLOSE_PARENTHESES 
 %token IF IF_ELSE WHILE PLUS_SIGN MINUS_SIGN MULTIPLICATION_SIGN DIVISION_SIGN
-%token NUM SMALLER_THAN_SIGN BIGGER_THAN_SIGN EQUAL_SIGN BIGGER_EQUAL_SIGN SMALLER_EQUAL_SIGN
+%token SMALLER_THAN_SIGN BIGGER_THAN_SIGN EQUAL_SIGN 
+%token BIGGER_EQUAL_SIGN SMALLER_EQUAL_SIGN
 
+/* Types */
+%type <s_type> OPEN_PARENTHESES
+%type <s_type> CLOSE_PARENTHESES
+%type <s_type> expression
+%type <s_type> term
+%type <s_type> factor
+%type <s_type> NUM_INT
+%type <s_type> NUM_FLOAT
+%type <s_type> ID
 
-/* Gramatic */
+/*
+
+*/
 %%
-program : PROGRAM ID OPEN_BRACKET optional_declarations CLOSE_BRACKET statement {printf("Program accepted!\n"); return 0;}
+program : PROGRAM ID OPEN_BRACKET optional_declarations CLOSE_BRACKET statement {printf("\n******************\nProgram accepted!\n******************\n"); return 0;}
         ;
 
 optional_declarations :	declarations
-					  |	%empty
-					  ;
+		|	%empty
+		;
 
 declarations : declaration SEMICOLON declarations
-			 | declaration
-			 ;
+		| declaration
+		;
 
-declaration : VAR id_save TWO_POINTS type {insert_type(yytext);} ;
+declaration : VAR ID TWO_POINTS type {insert($2, yytext);}
+		;
 
-id_save : ID {insert_name(yytext,"-"); if(flag_1 == 1) return 0;} ;
-
-type : INT
-     | FLOAT
-     ;
+type : INT 
+		| FLOAT
+		;
                     	
 statement : assign_statement
-	  | if_statement
-	  | iteration_statement
-	  | cmp_statement
-	  ;
+		| if_statement
+		| iteration_statement
+		| cmp_statement
+		;
 
-assign_statement : SET id_check expresion SEMICOLON 
-				 | READ id_check SEMICOLON
-				 | PRINT expresion SEMICOLON
-				 ;
-
-id_check : ID {check(yytext); if(flag_2 == 0) return 0;} ;
+assign_statement : SET ID expression SEMICOLON {check_table($2); if(flag_2 == 1) return 0;}
+		| READ ID SEMICOLON {check_table($2); if(flag_2 == 1) return 0;}
+		| PRINT expression SEMICOLON
+		;
 
 if_statement : IF OPEN_PARENTHESES comparison CLOSE_PARENTHESES statement
-	     	 | IF_ELSE OPEN_PARENTHESES comparison CLOSE_PARENTHESES statement statement
-	         ;
+		| IF_ELSE OPEN_PARENTHESES comparison CLOSE_PARENTHESES statement statement
+		;
 
 iteration_statement : WHILE OPEN_PARENTHESES comparison CLOSE_PARENTHESES statement
-		    		| FOR SET ID expresion TO expresion STEP expresion DO statement
-            	    ;
+		| FOR SET ID expression TO expression STEP expression DO statement
+		;
 
 cmp_statement : OPEN_BRACKET CLOSE_BRACKET
-	      | OPEN_BRACKET statement_list CLOSE_BRACKET
-	      ;
+		| OPEN_BRACKET statement_list CLOSE_BRACKET
+		;
 
 statement_list : statement
-	       | statement_list statement
-	       ;
+		| statement_list statement
+		;
 
-expresion : expresion PLUS_SIGN term
-	  | expresion MINUS_SIGN term 
-	  | term
-     	  ;
+expression : expression PLUS_SIGN term {check_type($1,$3); if(flag_3 == 1) return 0;}
+		| expression MINUS_SIGN term 
+		| term  
+		;
 
 term : term MULTIPLICATION_SIGN factor 
-     | term DIVISION_SIGN factor
-     | factor
-     ;
+		| term DIVISION_SIGN factor 
+		| factor  
+		;
 
-factor : OPEN_PARENTHESES expresion CLOSE_PARENTHESES
-        | ID
-        | NUM_INT
-		| NUM_FLOAT
-        ;
+factor : OPEN_PARENTHESES expression CLOSE_PARENTHESES
+		| ID {check_table($1); if(flag_2 == 1) return 0;}
+		| NUM_INT 
+		| NUM_FLOAT 
+		;
 
-comparison  :   expresion SMALLER_THAN_SIGN expresion
-            |   expresion BIGGER_THAN_SIGN expresion
-            |   expresion EQUAL_SIGN expresion
-	    	|   expresion SMALLER_EQUAL_SIGN expresion
-	    	|   expresion BIGGER_EQUAL_SIGN expresion
-            ;
+comparison  :   expression SMALLER_THAN_SIGN expression
+		|   expression BIGGER_THAN_SIGN expression
+		|   expression EQUAL_SIGN expression
+		|   expression SMALLER_EQUAL_SIGN expression
+		|   expression BIGGER_EQUAL_SIGN expression
+		;
 
 %%
 
 int yyerror(char const * s) {
-  fprintf(stderr, "¡%s! '%s'. line: %d.\n", s, yytext, yylineno);
+  fprintf(stderr, "%s! '%s'. line: %d.\n", s, yytext, yylineno);
 }
+
+/* Symbol table structure */
+struct SymbolTable{
+	char name[10], type[10];
+	int flag_type;
+	union{
+		int itype;
+		float ftype;	
+	}value;
+	struct SymbolTable *next;
+};
+struct SymbolTable *first, *last;
+
 /*******************
-	    MAIN
+		MAIN
 ********************/
 int main(int argc, char *argv[]) {
     if (argc == 1) {
-		printf("¡Error! Where is the input file? Please verify you are in the "
-          "right path.\n");
+	printf("I don't find your input file\n");
     } else {
         FILE *my_file = fopen(argv[1], "r");
         if (!my_file) {
@@ -143,7 +170,7 @@ int main(int argc, char *argv[]) {
         yyin = my_file;
         yyparse();
 		//printf("%d, %d", flag_1, flag_2);
-		if (flag_1 == 0 && flag_2 == 1){
+		if (flag_1 == 0 && flag_2 == 0 && flag_3 == 0){
 			display();
 		}
     } 
@@ -153,24 +180,27 @@ int main(int argc, char *argv[]) {
 }
 
 /* 
-	Insert() function: 
-	Perform a check to make sure the current name does not 
-	exist in the table. If name does not exist, space is 
-	allocated for a struct and added to	the table.
+	Insert() function
 */
-void insert_name(char *var_name, char* var_type){
-	
+void insert(char *var_name, char *var_type){
 	search(var_name);
 	if (flag_1 == 0){
 		struct SymbolTable *p;
 		p = malloc(sizeof(struct SymbolTable));
-		
 		strcpy(p->name, var_name);
 		strcpy(p->type, var_type);
 		p->next = NULL;
-		
+		if(strcmp(p->type, "int") == 0){
+			p->flag_type = 1;
+		}
+		else if(strcmp(p->type, "float") == 0){
+			p->flag_type = 2;
+		}
+		else{
+			p->flag_type = 0;
+		}
+
 		if (size == 0){
-			
 			first = p;
 			last = p;	
 		}
@@ -183,20 +213,17 @@ void insert_name(char *var_name, char* var_type){
 	else{
 		printf("\n\tThe variable ' %s ' already exists!", var_name);
 	}
-	//printf("\n\tVariable inserted.\n");
 }
-void insert_type(char* var_type){
-		strcpy(last->type, var_type);
-}
+
 /* 
 	Display() function: 
-	Print the entire symbol table in the current state.
 */
 void display(){
 	int i ;
 	struct SymbolTable *p;
 	p = first;
 	printf("\n\tNAME\t\tTYPE\n");
+	printf("\t________________________\n");
 	for(i = 0; i < size; i++){
 		printf("\t%s\t\t%s\n", p->name, p->type);
 		p = p->next;	
@@ -204,11 +231,6 @@ void display(){
 }
 /* 
 	Search() function: 
-	Searches the name inside the current list linked.
-	If there is variable with the same name, flag_1 turns
-	to 1.If not, continue with 0. And flag_2 represents
-	if a variable is used but doesn't exist in the
-	symbol table. 
 */
 void search(char name_tmp[]){
 	int i = 0;
@@ -222,21 +244,51 @@ void search(char name_tmp[]){
 		p = p->next;
 	}
 }
-void check(char name_tmp[]){
-	flag_2 = 0;	
+/* 
+	Check_table() function: 
+*/
+void check_table(char name_tmp[]){
 	int i = 0;
 	struct SymbolTable *p;
 	p = first;
 	for(i = 0; i < size; i++){
 		if(strcmp(p->name, name_tmp) == 0){
-			flag_2 = 1;	
+			flag_2 = 0;	
 		}
 		p = p->next;
 	}
-	if(flag_2 == 0){
+	if(flag_2 == 1){
 		printf("' %s ' doesn't exist.", name_tmp);	
 	}
 }
+
+/* 
+	Check_type() function: 
+*/
+void check_type(char *var_one, char *var_two){
+	struct SymbolTable *p;
+	p = first;
+	int i = 0;
+	int type_one = 0;
+	int type_two = 0;
+	for(i = 0; i < size; i++){
+		if(strcmp(p->name, var_one) == 0){
+			type_one = p->flag_type;
+		}
+		else if(strcmp(p->name, var_two) == 0){
+			type_two = p->flag_type;
+		}
+		p = p->next;
+	}
+
+	if (type_one != type_two){
+		flag_3 = 1;	
+	}
+	if(flag_3 == 1){
+		printf("Incompatible types.");	
+	}
+}
+
 
 
 
