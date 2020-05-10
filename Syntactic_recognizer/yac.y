@@ -69,7 +69,7 @@ void check_type(char*, char*);
 
 */
 %%
-program : PROGRAM ID OPEN_BRACKET optional_declarations CLOSE_BRACKET statement {printf("\n******************\nProgram accepted!\n******************\n"); return 0;}
+program : PROGRAM ID OPEN_BRACKET optional_declarations CLOSE_BRACKET statement {printf("\n\t************************\n\t  Program accepted!:)\n\t************************\n"); return 0;
         ;
 
 optional_declarations :	declarations
@@ -140,7 +140,8 @@ comparison  :   expression SMALLER_THAN_SIGN expression
 %%
 
 int yyerror(char const * s) {
-  fprintf(stderr, "%s! '%s'. line: %d.\n", s, yytext, yylineno);
+	fprintf(stderr, "%s! '%s'. line: %d.\n", s, yytext, yylineno);
+	flag_1 = 1;
 }
 
 /* Symbol table structure */
