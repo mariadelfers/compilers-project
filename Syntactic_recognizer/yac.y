@@ -16,6 +16,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <assert.h>
+#include <ctype.h>
 
 /*	Lex functions  */
 FILE extern *yyin;
@@ -34,7 +35,8 @@ void insert(char*, char*);
 void display();
 void search(char name_tmp[]);
 void check_table(char name_tmp[]);
-void check_type(char*, char*);
+void check_type(char var_one[], char var_two[]);
+void print(char*);
 %}
 
 %start program
@@ -54,6 +56,7 @@ void check_type(char*, char*);
 %token IF IF_ELSE WHILE PLUS_SIGN MINUS_SIGN MULTIPLICATION_SIGN DIVISION_SIGN
 %token SMALLER_THAN_SIGN BIGGER_THAN_SIGN EQUAL_SIGN 
 %token BIGGER_EQUAL_SIGN SMALLER_EQUAL_SIGN
+%token VALUE_INT VALUE_FLOAT
 
 /* Types */
 %type <s_type> OPEN_PARENTHESES
@@ -64,12 +67,14 @@ void check_type(char*, char*);
 %type <s_type> NUM_INT
 %type <s_type> NUM_FLOAT
 %type <s_type> ID
+%type <s_type> VALUE_INT
+%type <s_type> VALUE_FLOAT
 
 /*
 
 */
 %%
-program : PROGRAM ID OPEN_BRACKET optional_declarations CLOSE_BRACKET statement {printf("\n\t************************\n\t  Program accepted!:)\n\t************************\n"); return 0;
+program : PROGRAM ID OPEN_BRACKET optional_declarations CLOSE_BRACKET statement {printf("\n\t************************\n\t  Program accepted!:)\n\t************************\n"); return 0;}
         ;
 
 optional_declarations :	declarations
@@ -114,20 +119,20 @@ statement_list : statement
 		| statement_list statement
 		;
 
-expression : expression PLUS_SIGN term {check_type($1,$3); if(flag_3 == 1) return 0;}
-		| expression MINUS_SIGN term 
+expression : expression PLUS_SIGN term {check_type($1, $3); if(flag_3 == 1) return 0;}
+		| expression MINUS_SIGN term {check_type($1, $3); if(flag_3 == 1) return 0;}
 		| term  
 		;
 
-term : term MULTIPLICATION_SIGN factor 
-		| term DIVISION_SIGN factor 
+term : term MULTIPLICATION_SIGN factor  {check_type($1, $3); if(flag_3 == 1) return 0;}
+		| term DIVISION_SIGN factor {check_type($1, $3); if(flag_3 == 1) return 0;}
 		| factor  
 		;
 
 factor : OPEN_PARENTHESES expression CLOSE_PARENTHESES
 		| ID {check_table($1); if(flag_2 == 1) return 0;}
-		| NUM_INT 
-		| NUM_FLOAT 
+		| NUM_INT {$$ = "1";}
+		| NUM_FLOAT {$$ = "2";}
 		;
 
 comparison  :   expression SMALLER_THAN_SIGN expression
@@ -155,6 +160,10 @@ struct SymbolTable{
 	struct SymbolTable *next;
 };
 struct SymbolTable *first, *last;
+
+void print(char *var){
+	printf("[ %s ]", var);
+}
 
 /*******************
 		MAIN
@@ -249,6 +258,7 @@ void search(char name_tmp[]){
 	Check_table() function: 
 */
 void check_table(char name_tmp[]){
+	flag_2 = 1;
 	int i = 0;
 	struct SymbolTable *p;
 	p = first;
@@ -266,12 +276,27 @@ void check_table(char name_tmp[]){
 /* 
 	Check_type() function: 
 */
-void check_type(char *var_one, char *var_two){
+void check_type(char var_one[], char var_two[]){
+	int type_one = 0;
+	int type_two = 0;
+	char value_int[] = "1";
+	char value_float[] = "1";
+ 	if(strcmp(var_one, value_int) == 0){
+		type_one = 1;
+	}
+	else if(strcmp(var_one, value_float) == 0){
+		type_one = 2;
+	}
+	if(strcmp(var_two, value_int) == 0){
+		type_two = 1;	
+	}
+	else if(strcmp(var_two, value_float) == 0){
+		type_two = 2;	
+	}
 	struct SymbolTable *p;
 	p = first;
 	int i = 0;
-	int type_one = 0;
-	int type_two = 0;
+
 	for(i = 0; i < size; i++){
 		if(strcmp(p->name, var_one) == 0){
 			type_one = p->flag_type;

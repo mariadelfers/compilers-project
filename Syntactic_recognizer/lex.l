@@ -51,8 +51,8 @@ SYMBOLS         [$|_]
 ">=" {return BIGGER_EQUAL_SIGN;}
 
 ({SYMBOLS}|{ALPHABET})({ALPHABET}|{NUMBERS}|{SYMBOLS})* {yylval.idtype = strdup(yytext); return ID;}
-({NUMBERS})({NUMBERS})* {yylval.itype = atoi(yytext); return NUM_INT;}
-({NUMBERS})*"."({NUMBERS})({NUMBERS})* {yylval.ftype = atoi(yytext); return NUM_FLOAT;}
+({NUMBERS})({NUMBERS})* {yylval.idtype = strdup(yytext); return NUM_INT;}
+({NUMBERS})*"."({NUMBERS})({NUMBERS})* {yylval.idtype = strdup(yytext); return NUM_FLOAT;}
 . {}
 %%
 /*
