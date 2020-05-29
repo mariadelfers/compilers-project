@@ -199,7 +199,9 @@ program : PROGRAM_R ID OPEN_BRACKET optional_declarations CLOSE_BRACKET statemen
       {
         struct SyntacticNode* root;
         root = add_node(PROGRAM, NONE, NONE, NULL, NONE, $6, NULL, NULL, NULL, NULL);
-        display_table(table_head, "main");
+	//print_tree	
+	cover_tree(root);        
+	display_table(table_head, "main");
       }
 		;
 
@@ -814,6 +816,7 @@ void print_function(struct SyntacticNode* node){
     cover_tree() function
 */
 void cover_tree(struct SyntacticNode* node){
+//printf("[ %s ]\n", node->value.id_name);
   if(node == NULL)
     return;
   switch(node->node_type){
