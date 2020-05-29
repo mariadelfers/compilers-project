@@ -1,0 +1,10 @@
+program uno
+{
+   var x : int;
+   var y : float
+}
+{
+   set x 1;
+   set y 2.0;
+   print x / y;
+}  
