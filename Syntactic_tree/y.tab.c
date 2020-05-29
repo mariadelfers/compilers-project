@@ -2010,11 +2010,24 @@ void display_table(struct SymbolTable* table_head, char* tableName){
 /*
     search_table() function
 */
+struct SymbolTable* search(char const *var_name, struct SymbolTable* head){ 	 struct SymbolTable *ptr = head;
+// struct SymbolTable *ptr = NULL;
+	while(ptr != NULL){
+		assert(ptr -> name);
+		if(strcmp(ptr -> name, var_name) == 0){
+			return ptr;
+		}
+		ptr = ptr -> next;
+	}
+	return NULL;
+}
 struct SymbolTable* search_table(char const *var_name){
-  struct SymbolTable *ptr = NULL;
-  if(!ptr)
-    error_handler(VARIABLE_NOT_FOUND, MESSAGE_VARIABLE_NOT_FOUND);
-  return ptr;
+	struct SymbolTable *ptr = NULL;
+	ptr = search(var_name, table_head);
+	if(!ptr){
+		error_handler(VARIABLE_NOT_FOUND, MESSAGE_VARIABLE_NOT_FOUND);
+	}
+	return ptr;
 }
 /*
     set_int_value() function
