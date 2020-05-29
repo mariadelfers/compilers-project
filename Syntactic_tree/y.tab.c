@@ -1963,7 +1963,7 @@ struct SymbolTable {
 */
 void insert_table(struct SymbolTable** ptr_ptr_table, char const *var_name, int var_type){
     struct SymbolTable* new_node = (struct SymbolTable*) malloc(sizeof(struct SymbolTable));
-    new_node->name = (char *) malloc(strlen(var_name) + 1);
+    new_node -> name = (char *) malloc(strlen(var_name) + 1);
     strcpy (new_node -> name, var_name);
     new_node -> symbol_type = var_type;
     new_node -> value.itype = 0;
@@ -1977,18 +1977,18 @@ void print_symbol_table(struct SymbolTable *node){
     if(node == NULL){
         return;
     } 
-    if(node->symbol_type < sizeof(Type_node_label)){
-        printf("| %s |\t", Type_node_label[node->symbol_type]);
+    if(node -> symbol_type < sizeof(Type_node_label)){
+        printf("| %s |\t", Type_node_label[node -> symbol_type]);
     }
     else{
-        printf("| %d |\t", node->symbol_type);
+        printf("| %d |\t", node -> symbol_type);
     }
-    switch(node->symbol_type){
+    switch(node -> symbol_type){
         case INT_VALUE:
-        printf("| %d |\n", node->value.itype);
+        printf("| %d |\n", node -> value.itype);
         break;
         case FLOAT_VALUE:
-        printf("| %lf |\n", node->value.ftype);
+        printf("| %lf |\n", node -> value.ftype);
         break;
     }
     printf("\n");
@@ -2010,7 +2010,8 @@ void display_table(struct SymbolTable* table_head, char* tableName){
 /*
     search_table() function
 */
-struct SymbolTable* search(char const *var_name, struct SymbolTable* head){ 	 struct SymbolTable *ptr = head;
+struct SymbolTable* search(char const *var_name, struct SymbolTable* head){ 	 
+    struct SymbolTable *ptr = head;
 // struct SymbolTable *ptr = NULL;
 	while(ptr != NULL){
 		assert(ptr -> name);
@@ -2035,8 +2036,8 @@ struct SymbolTable* search_table(char const *var_name){
 void set_int_value(char const *var_name, int new_value){
     struct SymbolTable *ptr = search_table(var_name);
     if(ptr != NULL){
-        if(ptr->symbol_type == INT_VALUE){
-            ptr->value.itype = new_value;
+        if(ptr -> symbol_type == INT_VALUE){
+            ptr -> value.itype = new_value;
         }
     else{
       error_handler(INVALID_INT, MESSAGE_INVALID_INT);
@@ -2052,8 +2053,8 @@ void set_int_value(char const *var_name, int new_value){
 void set_float_value(char const *var_name, double new_value){
     struct SymbolTable *ptr = search_table(var_name);
     if(ptr != NULL){
-        if(ptr->symbol_type == FLOAT_VALUE){
-            ptr->value.ftype = new_value;
+        if(ptr -> symbol_type == FLOAT_VALUE){
+            ptr -> value.ftype = new_value;
         }
     }
     else{
@@ -2086,22 +2087,22 @@ struct SyntacticNode* add_node(int node_type, int ivalue, double fvalue, char* i
   struct SyntacticNode* ptr3, struct SyntacticNode* ptr4, struct SyntacticNode* nextNode){
 
     struct SyntacticNode* new_node = (struct SyntacticNode*) malloc(sizeof(struct SyntacticNode));
-    new_node->node_type = node_type;
-    new_node->head_type_node = head_type_node;
-    new_node->array_ptr[0] = ptr1;
-    new_node->array_ptr[1] = ptr2;
-    new_node->array_ptr[2] = ptr3;
-    new_node->array_ptr[3] = ptr4;
-    new_node->next = nextNode;
+    new_node -> node_type = node_type;
+    new_node -> head_type_node = head_type_node;
+    new_node -> array_ptr[0] = ptr1;
+    new_node -> array_ptr[1] = ptr2;
+    new_node -> array_ptr[2] = ptr3;
+    new_node -> array_ptr[3] = ptr4;
+    new_node -> next = nextNode;
     if(node_type == INT_VALUE){
-      new_node->value.itype = ivalue;
+      new_node -> value.itype = ivalue;
     }
     else if(node_type == FLOAT_VALUE){
-      new_node->value.ftype = fvalue;
+      new_node -> value.ftype = fvalue;
     }
     else if(node_type == ID_VALUE){
-      new_node->value.id_name = (char *) malloc(strlen(id_name) + 1);
-      strcpy (new_node->value.id_name, id_name);
+      new_node -> value.id_name = (char *) malloc(strlen(id_name) + 1);
+      strcpy (new_node -> value.id_name, id_name);
     }
     return new_node;
 }
@@ -2122,25 +2123,25 @@ void print_node(int type, char* label){
 void print_tree(struct SyntacticNode* node){
     if(node == NULL)
         return;
-    print_node(node->node_type, "node_type");
+    print_node(node -> node_type, "node_type");
     printf("address = %p\n", node);
-    print_node(node->head_type_node, "head_type_node");
-    if(node->node_type == INT_VALUE){
-        printf("Node value = %d\n", node->value.itype);
+    print_node(node -> head_type_node, "head_type_node");
+    if(node -> node_type == INT_VALUE){
+        printf("Node value = %d\n", node -> value.itype);
     }
-    else if(node->node_type == ID_VALUE){
-        printf("Node value = %s\n", node->value.id_name);
+    else if(node -> node_type == ID_VALUE){
+        printf("Node value = %s\n", node -> value.id_name);
     }
-    else if(node->node_type == FLOAT_VALUE){
-        printf("Node value = %f\n", node->value.ftype);
+    else if(node -> node_type == FLOAT_VALUE){
+        printf("Node value = %f\n", node -> value.ftype);
     }
     int i = 0;
     for(i = 0; i < 4; i++){
-        printf("ptr #%d: %p\n", i + 1, node->array_ptr[i]);
+        printf("ptr #%d: %p\n", i + 1, node -> array_ptr[i]);
     }
     printf("\n");
     for(i = 0; i < 4; i++){
-        print_tree(node->array_ptr[i]);
+        print_tree(node -> array_ptr[i]);
     }
 }
 /*
@@ -2148,27 +2149,27 @@ void print_tree(struct SyntacticNode* node){
 */
 int int_expression(struct SyntacticNode* iexpression_node){
     assert(iexpression_node != NULL);
-    if(iexpression_node->node_type == ADD){
-        return int_expression(iexpression_node->array_ptr[0]) + int_expression(iexpression_node->array_ptr[1]);
+    if(iexpression_node -> node_type == ADD){
+        return int_expression(iexpression_node -> array_ptr[0]) + int_expression(iexpression_node -> array_ptr[1]);
     }
-    else if(iexpression_node->node_type == SUBSTRACT){
-        return int_expression(iexpression_node->array_ptr[0]) - int_expression(iexpression_node->array_ptr[1]);
+    else if(iexpression_node -> node_type == SUBSTRACT){
+        return int_expression(iexpression_node -> array_ptr[0]) - int_expression(iexpression_node -> array_ptr[1]);
     }
-    else if(iexpression_node->node_type == MULTIPLY){
-        return int_expression(iexpression_node->array_ptr[0]) * int_expression(iexpression_node->array_ptr[1]);
+    else if(iexpression_node -> node_type == MULTIPLY){
+        return int_expression(iexpression_node -> array_ptr[0]) * int_expression(iexpression_node -> array_ptr[1]);
     }
-    else if(iexpression_node->node_type == DIVIDE){
-        return int_expression(iexpression_node->array_ptr[0]) / int_expression(iexpression_node->array_ptr[1]);
+    else if(iexpression_node -> node_type == DIVIDE){
+        return int_expression(iexpression_node -> array_ptr[0]) / int_expression(iexpression_node -> array_ptr[1]);
     }
-    assert(iexpression_node->node_type == INT_VALUE || iexpression_node->node_type == ID_VALUE);
+    assert(iexpression_node -> node_type == INT_VALUE || iexpression_node -> node_type == ID_VALUE);
     int return_value = 0;
-    if(iexpression_node->node_type == INT_VALUE){
-        return_value = iexpression_node->value.itype;
+    if(iexpression_node -> node_type == INT_VALUE){
+        return_value = iexpression_node -> value.itype;
     }
-    else if(iexpression_node->node_type == ID_VALUE){
-        struct SymbolTable *tmp = search_table(iexpression_node->value.id_name);
+    else if(iexpression_node -> node_type == ID_VALUE){
+        struct SymbolTable *tmp = search_table(iexpression_node -> value.id_name);
         assert(tmp -> symbol_type == INT_VALUE);
-        return_value = tmp->value.itype;
+        return_value = tmp -> value.itype;
     }
     return return_value;
 }
@@ -2177,27 +2178,27 @@ int int_expression(struct SyntacticNode* iexpression_node){
 */
 double float_expression(struct SyntacticNode* fexpression_node){
     assert(fexpression_node != NULL);
-    if(fexpression_node->node_type == ADD){
-        return float_expression(fexpression_node->array_ptr[0]) + float_expression(fexpression_node->array_ptr[1]);
+    if(fexpression_node -> node_type == ADD){
+        return float_expression(fexpression_node -> array_ptr[0]) + float_expression(fexpression_node -> array_ptr[1]);
     }
-    else if(fexpression_node->node_type == SUBSTRACT){
-        return float_expression(fexpression_node->array_ptr[0]) - float_expression(fexpression_node->array_ptr[1]);
+    else if(fexpression_node -> node_type == SUBSTRACT){
+        return float_expression(fexpression_node -> array_ptr[0]) - float_expression(fexpression_node -> array_ptr[1]);
     }
-    else if(fexpression_node->node_type == MULTIPLY){
-        return float_expression(fexpression_node->array_ptr[0]) * float_expression(fexpression_node->array_ptr[1]);
+    else if(fexpression_node -> node_type == MULTIPLY){
+        return float_expression(fexpression_node -> array_ptr[0]) * float_expression(fexpression_node -> array_ptr[1]);
     }
-    else if(fexpression_node->node_type == DIVIDE){
-        return float_expression(fexpression_node->array_ptr[0]) / float_expression(fexpression_node->array_ptr[1]);
+    else if(fexpression_node -> node_type == DIVIDE){
+        return float_expression(fexpression_node -> array_ptr[0]) / float_expression(fexpression_node -> array_ptr[1]);
     }
-    assert(fexpression_node->node_type == ID_VALUE || fexpression_node-> node_type == FLOAT_VALUE);
+    assert(fexpression_node -> node_type == ID_VALUE || fexpression_node -> node_type == FLOAT_VALUE);
     double return_value = 0;
-    if(fexpression_node->node_type == FLOAT_VALUE){
-        return_value = fexpression_node->value.ftype;
+    if(fexpression_node -> node_type == FLOAT_VALUE){
+        return_value = fexpression_node -> value.ftype;
     }
-    else if(fexpression_node->node_type == ID_VALUE){
-        struct SymbolTable *ptr = search_table(fexpression_node->value.id_name);
-        assert(ptr->symbol_type == FLOAT_VALUE);
-        return_value = ptr->value.ftype;
+    else if(fexpression_node -> node_type == ID_VALUE){
+        struct SymbolTable *ptr = search_table(fexpression_node -> value.id_name);
+        assert(ptr -> symbol_type == FLOAT_VALUE);
+        return_value = ptr -> value.ftype;
     }
     return return_value;
 }
@@ -2209,17 +2210,17 @@ int get_type(int type, struct SyntacticNode* node){
         return 0;
     }
     int count = 0;
-    if(node->node_type == type){
+    if(node -> node_type == type){
         count++;
     }
-    else if(node->node_type == ID_VALUE){
-        struct SymbolTable* ptr = search_table(node->value.id_name);
-        if(ptr->symbol_type == type)
+    else if(node -> node_type == ID_VALUE){
+        struct SymbolTable* ptr = search_table(node -> value.id_name);
+        if(ptr -> symbol_type == type)
         count++;
     }
     int i = 0;
     for(i = 0; i < 4; i++){
-        count += get_type(type, node->array_ptr[i]);
+        count += get_type(type, node -> array_ptr[i]);
     }
     return count;
 }
@@ -2254,13 +2255,13 @@ int is_float(struct SyntacticNode* node){
     comparison_function() function
 */
 int comparison_function(struct SyntacticNode* node){
-    assert(node->array_ptr[0] != NULL);
-    assert(node->array_ptr[1] != NULL);
-    if(is_int(node->array_ptr[0])){
-        assert(is_int(node->array_ptr[1]));
-        int int_left = int_expression(node->array_ptr[0]);
-        int int_rigth = int_expression(node->array_ptr[1]);
-        switch(node->node_type){
+    assert(node -> array_ptr[0] != NULL);
+    assert(node -> array_ptr[1] != NULL);
+    if(is_int(node -> array_ptr[0])){
+        assert(is_int(node -> array_ptr[1]));
+        int int_left = int_expression(node -> array_ptr[0]);
+        int int_rigth = int_expression(node -> array_ptr[1]);
+        switch(node -> node_type){
         case SMALLER_THAN:
             return int_left < int_rigth;
         case BIGGER_THAN:
@@ -2274,11 +2275,11 @@ int comparison_function(struct SyntacticNode* node){
         }
     }
     else{
-        assert(is_float(node->array_ptr[0]));
-        assert(is_float(node->array_ptr[1]));
-        double float_left = float_expression(node->array_ptr[0]);
-        int float_rigth = float_expression(node->array_ptr[1]);
-        switch(node->node_type){
+        assert(is_float(node -> array_ptr[0]));
+        assert(is_float(node -> array_ptr[1]));
+        double float_left = float_expression(node -> array_ptr[0]);
+        int float_rigth = float_expression(node -> array_ptr[1]);
+        switch(node -> node_type){
         case SMALLER_THAN:
             return float_left < float_rigth;
         case BIGGER_THAN:
@@ -2298,22 +2299,22 @@ int comparison_function(struct SyntacticNode* node){
     set_statement() function
 */
 void set_statement(struct SyntacticNode* node){
-    assert(node->array_ptr[0] != NULL);
-    assert(node->array_ptr[1] != NULL);
-    struct SymbolTable* ptr = search_table(node->array_ptr[0]->value.id_name);
+    assert(node -> array_ptr[0] != NULL);
+    assert(node -> array_ptr[1] != NULL);
+    struct SymbolTable* ptr = search_table(node -> array_ptr[0] -> value.id_name);
     assert(ptr != NULL);
     int set_ivalue;
     double set_fvalue;
-    switch(ptr->symbol_type){
+    switch(ptr -> symbol_type){
         case INT_VALUE:
-        set_ivalue = int_expression(node->array_ptr[1]);
-        set_int_value(ptr->name, set_ivalue);
-        assert(set_ivalue == ptr->value.itype);
+        set_ivalue = int_expression(node -> array_ptr[1]);
+        set_int_value(ptr -> name, set_ivalue);
+        assert(set_ivalue == ptr -> value.itype);
         break;
         case FLOAT_VALUE:
-        set_fvalue = float_expression(node->array_ptr[1]);
-        set_float_value(ptr->name, set_fvalue);
-        assert(set_fvalue == ptr->value.ftype);
+        set_fvalue = float_expression(node -> array_ptr[1]);
+        set_float_value(ptr -> name, set_fvalue);
+        assert(set_fvalue == ptr -> value.ftype);
         break;
     }
 }
@@ -2321,10 +2322,10 @@ void set_statement(struct SyntacticNode* node){
     if_statement() function
 */
 void if_statement(struct SyntacticNode* node){
-    assert(node->array_ptr[0] != NULL);
-    if(comparison_function(node->array_ptr[0])){
-        if(node->array_ptr[1] != NULL){
-            cover_tree(node->array_ptr[1]);
+    assert(node -> array_ptr[0] != NULL);
+    if(comparison_function(node -> array_ptr[0])){
+        if(node -> array_ptr[1] != NULL){
+            cover_tree(node -> array_ptr[1]);
         }
     }
 }
@@ -2386,20 +2387,20 @@ double read_float(){
     read_funciton() function
 */
 void read_function(struct SyntacticNode* node){
-  assert(node->array_ptr[0] != NULL);
-  struct SymbolTable* ptr = search_table(node->array_ptr[0]->value.id_name);
+  assert(node -> array_ptr[0] != NULL);
+  struct SymbolTable* ptr = search_table(node -> array_ptr[0] -> value.id_name);
   int set_ivalue;
   double set_fvalue;
-  switch(ptr->symbol_type){
+  switch(ptr -> symbol_type){
     case INT_VALUE:
       set_ivalue = read_int();
-      set_int_value(ptr->name, set_ivalue);
-      assert(set_ivalue == ptr->value.itype);
+      set_int_value(ptr -> name, set_ivalue);
+      assert(set_ivalue == ptr -> value.itype);
       break;
     case FLOAT_VALUE:
       set_fvalue = read_float();
-      set_float_value(ptr->name, set_fvalue);
-      assert(set_fvalue == ptr->value.ftype);
+      set_float_value(ptr -> name, set_fvalue);
+      assert(set_fvalue == ptr -> value.ftype);
       break;
   }
 }
@@ -2407,18 +2408,18 @@ void read_function(struct SyntacticNode* node){
     print_function() function
 */
 void print_function(struct SyntacticNode* node){
-  assert(node->array_ptr[0] != NULL);
-  if(node->array_ptr[0]->node_type == INT_VALUE){
-    printf("%d\n", node->array_ptr[0]->value.itype);
+  assert(node -> array_ptr[0] != NULL);
+  if(node -> array_ptr[0] -> node_type == INT_VALUE){
+    printf("%d\n", node -> array_ptr[0] -> value.itype);
   } 
-  else if(node->array_ptr[0]->node_type == FLOAT_VALUE){
-    printf("%f\n", node->array_ptr[0]->value.ftype);
+  else if(node -> array_ptr[0] -> node_type == FLOAT_VALUE){
+    printf("%f\n", node -> array_ptr[0] -> value.ftype);
   }
-  else if(node->array_ptr[0]->head_type_node == COMPARISON 
-    || node->array_ptr[0]->head_type_node == TERM
-    || node->array_ptr[0]->head_type_node == FACTOR){ 
-      if(is_int(node->array_ptr[0])){
-        printf("%d\n", int_expression(node->array_ptr[0]));
+  else if(node -> array_ptr[0] -> head_type_node == COMPARISON 
+    || node -> array_ptr[0] -> head_type_node == TERM
+    || node -> array_ptr[0] -> head_type_node == FACTOR){ 
+      if(is_int(node -> array_ptr[0])){
+        printf("%d\n", int_expression(node -> array_ptr[0]));
       }
       else{
         assert(is_float(node->array_ptr[0]));
@@ -2458,14 +2459,14 @@ void cover_tree(struct SyntacticNode* node){
         for_statement(node);
         break;
   } 
-  if(node->node_type != IF
-    && node->node_type != IFELSE
-    && node->node_type != WHILE
-    && node->node_type != FOR){
+  if(node -> node_type != IF
+    && node -> node_type != IFELSE
+    && node -> node_type != WHILE
+    && node -> node_type != FOR){
 
     int i;
     for(i = 0; i < 4; i++)
-      cover_tree(node->array_ptr[i]);
+      cover_tree(node -> array_ptr[i]);
   }
 }
 /*
