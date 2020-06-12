@@ -96,7 +96,7 @@ void display_table(struct SymbolTable *, char*);
 struct SyntacticNode* add_node(int, double, char*, int, int, 
   struct SyntacticNode*, struct SyntacticNode*, struct SyntacticNode*,
   struct SyntacticNode*, struct SyntacticNode*);
-struct SyntacticNode *stack_ptr;
+struct Funcion_En_Uso *stack_ptr;
 void print_tree(struct SyntacticNode*, char*);
 void imprime_Arbol_Sintactico(struct SyntacticNode*);
 void cover_tree(struct SyntacticNode*);
