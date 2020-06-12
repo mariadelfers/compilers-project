@@ -355,8 +355,9 @@ int funcion_Termino_Y_Regreso(){
 */
 void insert_table(struct SymbolTable** apuntador_Puntero_Tope_Tabla, char const *new_name, int tipo_Simbolo, int tipo_Simbolo_Regreso, 
 struct SymbolTable *puntero_Nodo_Tabla_Simbolos, struct SyntacticNode *puntero_Nodo_Raiz_Arbol_Sintactico){
+  
   struct SymbolTable* new_node = (struct SymbolTable*) malloc(sizeof(struct SymbolTable));
-  new_node -> name = (char *) malloc(strlen(nombre_Simbolo) + 1);
+  new_node -> name = (char *) malloc(strlen(new_name) + 1);
   strcpy (new_node->name, new_name);
   new_node -> type = tipo_Simbolo;
   new_node -> return_type = tipo_Simbolo_Regreso;
@@ -404,7 +405,7 @@ void print_node_table(struct SymbolTable *node){
 
   printf("Simbolo \t\t\t=\t%s\n", node->name);
   if(node->type < sizeof(Nombres_Tipos_De_Nodos_Arbol_Sintactico)){ 
-    printf("Tipo \t\t\t\t=\t%s\n", Nombres_Tipos_De_Nodos_Arbol_Sintactico[nodo->type]);
+    printf("Tipo \t\t\t\t=\t%s\n", Nombres_Tipos_De_Nodos_Arbol_Sintactico[node->type]);
   } 
   else { 
     printf("Tipo \t\t\t\t=\t%d\n", node->type); 
