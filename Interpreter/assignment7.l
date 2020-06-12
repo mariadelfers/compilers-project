@@ -49,9 +49,9 @@ return      {return RETURN_RETURN;}
 ")"         {return ASCII_PARENTHESES_2;}
 ","         {return ASCII_COMMA;}
 
-("-")?{DIGIT}* {yylval.valor_int = atoi(yytext); return INTEGER_NUMBER;}
+("-")?{DIGIT}* {yylval.itype = atoi(yytext); return INTEGER_NUMBER;}
 ("-")?(({NUMBERS}{DIGIT}*|"0")"."({DIGIT}*{DIGIT})) {ftype = atof(yytext); return FLOATING_POINT_NUMBER;}
-("$"|{ALPHABET}|"_")("$"|{ALPHABET}|"_"|{DIGIT})* {yylval.nombre_Identificador = strdup(yytext); return IDENTIFIER;}
+("$"|{ALPHABET}|"_")("$"|{ALPHABET}|"_"|{DIGIT})* {yylval.id_name= strdup(yytext); return IDENTIFIER;}
 
 <<EOF>>     {return FILE_END;}
 " "         {;}
