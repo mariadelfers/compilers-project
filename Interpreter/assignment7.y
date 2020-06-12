@@ -627,7 +627,7 @@ double float_expression(struct SyntacticNode* node){
     return float_expression(node->array_ptr[0]) + float_expression(node->array_ptr[1]);
   } 
   else if(node->type == SUBSTRACT){ 
-    return float_expression(flot_Node_Expresion->array_ptr[0]) - float_expression(node->array_ptr[1]);
+    return float_expression(node->array_ptr[0]) - float_expression(node->array_ptr[1]);
   } 
   else if(node->type == MULTIPLY){ 
     return float_expression(node->array_ptr[0]) * float_expression(node->array_ptr[1]);
@@ -654,43 +654,59 @@ double float_expression(struct SyntacticNode* node){
   return valor_a_retornar;
 }
 /*
-    insert_node() function
+    count_nodes() function
 */
-int cuenta_Tipo_Nodo_Subarbol(int tipo_Nodoo, struct SyntacticNode* nodo){
-  if(nodo == NULL) return 0;
+int count_nodes(int tipo_Nodoo, struct SyntacticNode* nodo){
+  if(nodo == NULL) {
+    return 0;
+  }
   int contador = 0;
-  if(nodo->type == tipo_Nodoo){ contador++;
-  } else if(nodo->type == ID_VALUE){ 
+  if(nodo->type == tipo_Nodoo){ 
+    contador++;
+  } 
+  else if(nodo->type == ID_VALUE){ 
     struct SymbolTable* identificador_nodo_actual = get_table(nodo->value.nombre_Identificador);
-    if(identificador_nodo_actual->type == tipo_Nodoo) contador++;
+    if(identificador_nodo_actual->type == tipo_Nodoo){
+      contador++;
+    }
   }
   int i = 0;
-  for(i = 0; i < 4; i++){ contador += cuenta_Tipo_Nodo_Subarbol(tipo_Nodoo, nodo->array_ptr[i]); }
+  for(i = 0; i < 4; i++){ 
+    contador += count_nodes(tipo_Nodoo, nodo->array_ptr[i]); 
+  }
   return contador;
 }
 /*
-    insert_node() function
+    check_type() function
 */
-int expresion_Tipos(struct SyntacticNode* nodo_Expresion){
-  int cont_nodo_subarbol_int = cuenta_Tipo_Nodo_Subarbol(VALOR_INT_, nodo_Expresion);
-  int cont_nodo_subarbol_doble = cuenta_Tipo_Nodo_Subarbol(VALOR_FLOAT_, nodo_Expresion);
-  if(cont_nodo_subarbol_int > 0 && cont_nodo_subarbol_doble == 0) return VALOR_INT_;
-  else if(cont_nodo_subarbol_int == 0 && cont_nodo_subarbol_doble > 0) return VALOR_FLOAT_;
+int check_type(struct SyntacticNode* nodo_Expresion){
+  int cont_nodo_subarbol_int = count_nodes(VALOR_INT_, nodo_Expresion);
+  int cont_nodo_subarbol_doble = count_nodes(VALOR_FLOAT_, nodo_Expresion);
+  if(cont_nodo_subarbol_int > 0 && cont_nodo_subarbol_doble == 0){ 
+    return VALOR_INT_;
+  }
+  else if(cont_nodo_subarbol_int == 0 && cont_nodo_subarbol_doble > 0){
+    return VALOR_FLOAT_;
+  }
   manejador_De_Errores(TIPO_DATO_ERRONEO, TIPO_DATO_ERRONEO_TEXTO);
   return 0;
 } 
 /*
-    insert_node() function
+    is_int() function
 */
-int expresion_Es_Int(struct SyntacticNode* nodo_Expresion){ return expresion_Tipos(nodo_Expresion) == VALOR_INT_; }
+int is_int(struct SyntacticNode* nodo_Expresion){ 
+  return check_type(nodo_Expresion) == VALOR_INT_; 
+}
 /*
-    insert_node() function
+    is_float() function
 */
-int expresion_Es_Float(struct SyntacticNode* nodo_Expresion){ return expresion_Tipos(nodo_Expresion) == VALOR_FLOAT_; }
+int is_float(struct SyntacticNode* nodo_Expresion){ 
+  return check_type(nodo_Expresion) == VALOR_FLOAT_; 
+}
 /*
-    insert_node() function
+    table_size() function
 */
-int longitud_Tabla_Simbolos(char const *nombre_D_Funcion){
+int table_size(char const *nombre_D_Funcion){
   struct SymbolTable* simbolo_Funcion = check_table(nombre_D_Funcion, function_head);
   assert(simbolo_Funcion);
   struct SymbolTable* simbolo_actual_en_funcion_ = simbolo_Funcion->puntero_Nodo_Tabla_Simbolos;
@@ -702,14 +718,14 @@ int longitud_Tabla_Simbolos(char const *nombre_D_Funcion){
   return long_simbolo_tabla;
 }
 /*
-    insert_node() function
+    params_size() function
 */
-int cuenta_Parametros(struct SyntacticNode* nodo, int profunidad_Desde_Nodo_Raiz){
+int params_size(struct SyntacticNode* nodo, int profunidad_Desde_Nodo_Raiz){
   if(!nodo) return 0;
   int contador = 0;
   if(profunidad_Desde_Nodo_Raiz <= 1) contador += (nodo->type == PARAMETER_VALUE);
   int i = 0;
-  for(i = 0; i < 4; i++) contador += cuenta_Parametros(nodo->array_ptr[i], profunidad_Desde_Nodo_Raiz + (nodo->type == FUNCTION_VALUE));
+  for(i = 0; i < 4; i++) contador += params_size(nodo->array_ptr[i], profunidad_Desde_Nodo_Raiz + (nodo->type == FUNCTION_VALUE));
   return contador;
 }
 /*
@@ -720,15 +736,16 @@ void avanza_Puntero_Tabla_Simbolos(struct SymbolTable** apuntador_Puntero_Simbol
   for(i = 0; i < cant_movimientos; i++) *apuntador_Puntero_Simbolo_Tabla_Simbolos = (*apuntador_Puntero_Simbolo_Tabla_Simbolos)->next;
 }
 /*
-    insert_node() function
+    get_param() function
 */
-struct SyntacticNode* obtener_Siguiente_Parametro(struct SyntacticNode** apuntador_Puntero_Nodo_Subarbol){
+struct SyntacticNode* get_param(struct SyntacticNode** apuntador_Puntero_Nodo_Subarbol){
   assert(*apuntador_Puntero_Nodo_Subarbol);
   struct SyntacticNode *puntero_Siguiente_Parametro = NULL;
   if((*apuntador_Puntero_Nodo_Subarbol)->type == FUNCTION_VALUE){
     assert((*apuntador_Puntero_Nodo_Subarbol)->array_ptr[0]);
     puntero_Siguiente_Parametro = (*apuntador_Puntero_Nodo_Subarbol)->array_ptr[0]->array_ptr[0];
-  } else {
+  } 
+  else {
     assert((*apuntador_Puntero_Nodo_Subarbol)->type == PARAMETER_VALUE);
      puntero_Siguiente_Parametro = (*apuntador_Puntero_Nodo_Subarbol)->array_ptr[0]; 
      }
@@ -737,12 +754,12 @@ struct SyntacticNode* obtener_Siguiente_Parametro(struct SyntacticNode** apuntad
   return puntero_Siguiente_Parametro;
 }
 /*
-    insert_node() function
+    check_param() function
 */
-int parametros_Correctos(struct SyntacticNode* funcion_Nodo){
+int check_param(struct SyntacticNode* funcion_Nodo){
   int funcion_Longitud_Tabla_Simbolos = longitud_Tabla_Simbolos(funcion_Nodo->value.nombre_Identificador);
   printf("Longitud Tabla de Simbolos = \t%d\n", funcion_Longitud_Tabla_Simbolos);
-  int cantidad_Parametros = cuenta_Parametros(funcion_Nodo, 0);
+  int cantidad_Parametros = params_size(funcion_Nodo, 0);
   printf("Cantidad de Parametros = \t%d\n", cantidad_Parametros);
   assert(funcion_Longitud_Tabla_Simbolos >= cantidad_Parametros);
   struct SymbolTable* puntero_Parametro_Actuall = check_table(funcion_Nodo->value.nombre_Identificador, function_head)->puntero_Nodo_Tabla_Simbolos;
@@ -751,10 +768,10 @@ int parametros_Correctos(struct SyntacticNode* funcion_Nodo){
   struct SyntacticNode* puntero_parametro_actual = NULL;
   int i = 0;
   for(i = 0; i < cantidad_Parametros; i++){
-    puntero_parametro_actual = obtener_Siguiente_Parametro(&puntero_de_funcion_subarbol);
+    puntero_parametro_actual = get_param(&puntero_de_funcion_subarbol);
     assert(puntero_Parametro_Actuall);
     assert(puntero_parametro_actual);
-    if((expresion_Es_Int(puntero_parametro_actual) && puntero_Parametro_Actuall->type != VALOR_INT_) || (expresion_Es_Float(puntero_parametro_actual) && puntero_Parametro_Actuall->type != VALOR_FLOAT_)){
+    if((is_int(puntero_parametro_actual) && puntero_Parametro_Actuall->type != VALOR_INT_) || (is_float(puntero_parametro_actual) && puntero_Parametro_Actuall->type != VALOR_FLOAT_)){
       return 0;
     }
     puntero_Parametro_Actuall = puntero_Parametro_Actuall->next;
@@ -762,11 +779,11 @@ int parametros_Correctos(struct SyntacticNode* funcion_Nodo){
   return 1;
 }
 /*
-    insert_node() function
+    set_param() function
 */
-void asigna_Parametros(struct SyntacticNode* funcion_Nodo){
-  int funcion_Longitud_Tabla_Simbolos = longitud_Tabla_Simbolos(funcion_Nodo->value.nombre_Identificador);
-  int cantidad_Parametros = cuenta_Parametros(funcion_Nodo, 0);
+void set_param(struct SyntacticNode* funcion_Nodo){
+  int funcion_Longitud_Tabla_Simbolos = table_size(funcion_Nodo->value.nombre_Identificador);
+  int cantidad_Parametros = params_size(funcion_Nodo, 0);
   assert(funcion_Longitud_Tabla_Simbolos >= cantidad_Parametros);
   struct SymbolTable* puntero_Parametro_Actuall = check_table(funcion_Nodo->value.nombre_Identificador, function_head)->puntero_Nodo_Tabla_Simbolos;
   avanza_Puntero_Tabla_Simbolos(&puntero_Parametro_Actuall, funcion_Longitud_Tabla_Simbolos - cantidad_Parametros);
@@ -774,12 +791,13 @@ void asigna_Parametros(struct SyntacticNode* funcion_Nodo){
   struct SyntacticNode* puntero_parametro_actual = NULL;
   int i = 0;
   for(i = 0; i < cantidad_Parametros; i++){
-    puntero_parametro_actual = obtener_Siguiente_Parametro(&puntero_de_funcion_subarbol);
+    puntero_parametro_actual = get_param(&puntero_de_funcion_subarbol);
     assert(puntero_Parametro_Actuall);
     assert(puntero_parametro_actual);
     if(puntero_Parametro_Actuall->type == VALOR_INT_){
       puntero_Parametro_Actuall->value.itype = int_expression(puntero_parametro_actual);
-    } else{
+    } 
+    else{
       assert(puntero_Parametro_Actuall->type == VALOR_FLOAT_);
       puntero_Parametro_Actuall->value.ftype = float_expression(puntero_parametro_actual);
     }
@@ -787,49 +805,58 @@ void asigna_Parametros(struct SyntacticNode* funcion_Nodo){
   }
 }
 /*
-    insert_node() function
+    aux_function() function
 */
 void aux_function(struct SyntacticNode* funcion_Nodo){
-  if(!parametros_Correctos(funcion_Nodo)){ manejador_De_Errores(ASIGNACION_ERRONEA, ASIGNACION_ERRONEA_TEXTO); }
-  asigna_Parametros(funcion_Nodo);
+  if(!check_param(funcion_Nodo)){ manejador_De_Errores(ASIGNACION_ERRONEA, ASIGNACION_ERRONEA_TEXTO); }
+  set_param(funcion_Nodo);
   struct SymbolTable* simbolo_Funcion = check_table(funcion_Nodo->value.nombre_Identificador, function_head);
   set_function(simbolo_Funcion);
   imprime_Llamada_A_Pila();
   cover_tree(simbolo_Funcion->puntero_Nodo_Raiz_Arbol_Sintactico);
 }
 /*
-    insert_node() function
+    print_function() function
 */
-void funcion_Imprimir(struct SyntacticNode* imprime_Nodo){
+void print_function(struct SyntacticNode* imprime_Nodo){
   assert(imprime_Nodo->array_ptr[0] != NULL);
-  if(imprime_Nodo->array_ptr[0]->type == VALOR_INT_){ printf("%d\n", imprime_Nodo->array_ptr[0]->value.itype);
-  } else if(imprime_Nodo->array_ptr[0]->type == VALOR_FLOAT_){ printf("%f\n", imprime_Nodo->array_ptr[0]->value.ftype);
-  } else if(imprime_Nodo->array_ptr[0]->padre_Tipo_De_Nodo == EXPR || imprime_Nodo->array_ptr[0]->padre_Tipo_De_Nodo == TERM || imprime_Nodo->array_ptr[0]->padre_Tipo_De_Nodo == FACTOR){
+  if(imprime_Nodo->array_ptr[0]->type == VALOR_INT_){ 
+    printf("%d\n", imprime_Nodo->array_ptr[0]->value.itype);
+  } 
+  else if(imprime_Nodo->array_ptr[0]->type == VALOR_FLOAT_){ 
+    printf("%f\n", imprime_Nodo->array_ptr[0]->value.ftype);
+  } 
+  else if(imprime_Nodo->array_ptr[0]->padre_Tipo_De_Nodo == EXPR || imprime_Nodo->array_ptr[0]->padre_Tipo_De_Nodo == TERM || imprime_Nodo->array_ptr[0]->padre_Tipo_De_Nodo == FACTOR){
     if(imprime_Nodo->array_ptr[0]->type == FUNCTION_VALUE){ 
       aux_function(imprime_Nodo->array_ptr[0]);
       struct SymbolTable* funcion_Actual_En_Uso = check_table(imprime_Nodo->array_ptr[0]->value.nombre_Identificador, function_head);
       if(funcion_Actual_En_Uso->return_type == VALOR_INT_){ printf("%d\n", stack_ptr->value.itype);
-      } else{
+      } 
+      else{
         assert(funcion_Actual_En_Uso->return_type == VALOR_FLOAT_);
         printf("%lf\n", stack_ptr->value.ftype);
       }
       get_function();
-    } else{ if(expresion_Es_Int(imprime_Nodo->array_ptr[0])){ printf("%d\n", int_expression(imprime_Nodo->array_ptr[0]));
-      } else{
-        assert(expresion_Es_Float(imprime_Nodo->array_ptr[0]));
+    } 
+    else{ 
+      if(is_int(imprime_Nodo->array_ptr[0])){ 
+        printf("%d\n", int_expression(imprime_Nodo->array_ptr[0]));
+      } 
+      else{
+        assert(is_float(imprime_Nodo->array_ptr[0]));
         printf("%lf\n", float_expression(imprime_Nodo->array_ptr[0]));
       }
     }
   }
 }
 /*
-    insert_node() function
+    expression_function() function
 */
-int funcion_Expresion(struct SyntacticNode* nodo_Expresion){
+int expression_function(struct SyntacticNode* nodo_Expresion){
   assert(nodo_Expresion->array_ptr[0] != NULL);
   assert(nodo_Expresion->array_ptr[1] != NULL);
-  if(expresion_Es_Int(nodo_Expresion->array_ptr[0])){
-    assert(expresion_Es_Int(nodo_Expresion->array_ptr[1]));
+  if(is_int(nodo_Expresion->array_ptr[0])){
+    assert(is_int(nodo_Expresion->array_ptr[1]));
     int int_Izq = int_expression(nodo_Expresion->array_ptr[0]);
     int int_Der = int_expression(nodo_Expresion->array_ptr[1]);
     switch(nodo_Expresion->type){
@@ -846,8 +873,8 @@ int funcion_Expresion(struct SyntacticNode* nodo_Expresion){
     }
   }
   else{
-    assert(expresion_Es_Float(nodo_Expresion->array_ptr[0]));
-    assert(expresion_Es_Float(nodo_Expresion->array_ptr[1]));
+    assert(is_float(nodo_Expresion->array_ptr[0]));
+    assert(is_float(nodo_Expresion->array_ptr[1]));
     double double_Izq = float_expression(nodo_Expresion->array_ptr[0]);
     int double_Der = float_expression(nodo_Expresion->array_ptr[1]);
     switch(nodo_Expresion->type){
@@ -867,36 +894,39 @@ int funcion_Expresion(struct SyntacticNode* nodo_Expresion){
   return -1;
 }
 /*
-    insert_node() function
+    while_function() function
 */
-void funcion_While(struct SyntacticNode* nodo_While){
+void while_function(struct SyntacticNode* nodo_While){
   assert(nodo_While->array_ptr[0] != NULL);
-  while(funcion_Expresion(nodo_While->array_ptr[0])){
+  while(expression_function(nodo_While->array_ptr[0])){
     cover_tree(nodo_While->array_ptr[1]);
   }
 }
 /*
-    insert_node() function
+    if_function() function
 */
-void funcion_If(struct SyntacticNode* nodo_if){
+void if_function(struct SyntacticNode* nodo_if){
   assert(nodo_if->array_ptr[0] != NULL);
-  if(funcion_Expresion(nodo_if->array_ptr[0])){
+  if(expression_function(nodo_if->array_ptr[0])){
     if(nodo_if->array_ptr[1] != NULL) cover_tree(nodo_if->array_ptr[1]);
   }
 }
 /*
-    insert_node() function
+    ifelse_function() function
 */
-void funcion_IfElse(struct SyntacticNode* nodo_IfElse){
+void ifelse_function(struct SyntacticNode* nodo_IfElse){
   assert(nodo_IfElse->array_ptr[0] != NULL);
-  if(funcion_Expresion(nodo_IfElse->array_ptr[0])){ cover_tree(nodo_IfElse->array_ptr[1]);
-  } else{ cover_tree(nodo_IfElse->array_ptr[2]);
+  if(expression_function(nodo_IfElse->array_ptr[0])){ 
+    cover_tree(nodo_IfElse->array_ptr[1]);
+  } 
+  else{ 
+    cover_tree(nodo_IfElse->array_ptr[2]);
   }
 }
 /*
-    insert_node() function
+    set_function() function
 */
-void funcion_Set(struct SyntacticNode* nodo_Set){
+void set_function(struct SyntacticNode* nodo_Set){
   assert(nodo_Set->array_ptr[0] != NULL);
   assert(nodo_Set->array_ptr[1] != NULL);
   struct SymbolTable* nodo_Actl = get_table(nodo_Set->array_ptr[0]->value.nombre_Identificador);
@@ -917,9 +947,9 @@ void funcion_Set(struct SyntacticNode* nodo_Set){
   }
 }
 /*
-    insert_node() function
+    read_int() function
 */
-int leer_Int(){
+int read_int(){
   int valor_int = -1;
   printf("Asigna valor a Int = ");
   int scanf_valor_retorna = scanf("%d", &valor_int);
@@ -927,9 +957,9 @@ int leer_Int(){
   return valor_int;
 }
 /*
-    insert_node() function
+    read_float() function
 */
-double leer_Double(){
+double read_float(){
   double ftype = -1.0;
   printf("Asigna valor a Float = ");
   int scanf_valor_retorna = scanf("%lf", &ftype);
@@ -937,30 +967,30 @@ double leer_Double(){
   return ftype;
 }
 /*
-    insert_node() function
+    read_function() function
 */
-void funcion_Leer(struct SyntacticNode* nodo_Leer){
+void read_function(struct SyntacticNode* nodo_Leer){
   assert(nodo_Leer->array_ptr[0] != NULL);
   struct SymbolTable* nodo_Actl = get_table(nodo_Leer->array_ptr[0]->value.nombre_Identificador);
   int valor_a_set;
   double valordoble_a_set;
   switch(nodo_Actl->type){
     case VALOR_INT_:
-      valor_a_set = leer_Int();
+      valor_a_set = read_int();
       get_int_table(nodo_Actl->name, valor_a_set);
       assert(valor_a_set == nodo_Actl->value.itype);
       break;
     case VALOR_FLOAT_:
-      valordoble_a_set = leer_Double();
+      valordoble_a_set = read_float();
       get_float_table(nodo_Actl->name, valordoble_a_set);
       assert(valordoble_a_set == nodo_Actl->value.ftype);
       break;
   }
 }
 /*
-    insert_node() function
+    return_function() function
 */
-void funcion_Return(struct SyntacticNode* nodo_Return){
+void return_function(struct SyntacticNode* nodo_Return){
   assert(nodo_Return->array_ptr[0] != NULL);
   struct RunFunction* funcion_actual = stack_ptr;
   if(nodo_Return->array_ptr[0]->type == VALOR_INT_){
@@ -971,11 +1001,11 @@ void funcion_Return(struct SyntacticNode* nodo_Return){
     funcion_actual->node_ptr->value.ftype = nodo_Return->array_ptr[0]->value.ftype;
   } else if(nodo_Return->array_ptr[0]->padre_Tipo_De_Nodo == EXPR || nodo_Return->array_ptr[0]->padre_Tipo_De_Nodo == TERM || nodo_Return->array_ptr[0]->padre_Tipo_De_Nodo == FACTOR){
     if(nodo_Return->array_ptr[0]->type == FUNCTION_VALUE){ 
-    } else{ if(expresion_Es_Int(nodo_Return->array_ptr[0])){
+    } else{ if(is_int(nodo_Return->array_ptr[0])){
         assert(funcion_actual->node_ptr->return_type == VALOR_INT_);
         funcion_actual->node_ptr->value.itype = int_expression(nodo_Return->array_ptr[0]);
       } else{
-        assert(expresion_Es_Float(nodo_Return->array_ptr[0]));
+        assert(is_float(nodo_Return->array_ptr[0]));
         assert(funcion_actual->node_ptr->return_type == VALOR_FLOAT_);
         funcion_actual->node_ptr->value.ftype = float_expression(nodo_Return->array_ptr[0]);
       }
@@ -984,7 +1014,7 @@ void funcion_Return(struct SyntacticNode* nodo_Return){
   stack_ptr->termino_Y_Regreso = 1;
 }
 /*
-    insert_node() function
+    cover_tree() function
 */
 void cover_tree(struct SyntacticNode* nodo){
   if(nodo == NULL) return;
@@ -996,31 +1026,31 @@ void cover_tree(struct SyntacticNode* nodo){
       break;
 
     case PRINT:
-      funcion_Imprimir(nodo);
+      print_function(nodo);
       break;
 
     case IF:
-      funcion_If(nodo);
+      if_function(nodo);
       break;
 
     case IFELSE:
-      funcion_IfElse(nodo);
+      ifelse_function(nodo);
       break;
 
     case WHILE:
-      funcion_While(nodo);
+      while_function(nodo);
       break;
 
     case SET:
-      funcion_Set(nodo);
+      set_function(nodo);
       break;
 
     case READ:
-      funcion_Leer(nodo);
+      read_function(nodo);
       break;
     
     case RETURN:
-      funcion_Return(nodo);
+      return_function(nodo);
       break;
   } 
 
@@ -1030,22 +1060,22 @@ void cover_tree(struct SyntacticNode* nodo){
   }
 }
 /*
-    insert_node() function
+    yyerror() function
 */
 int yyerror(char const * s) {
   fprintf(stderr, "Error = \t%s\n", s);
   return 0;
 }
 /*
-    insert_node() function
+    input_handle() function
 */
 void manejo_entrada(int argc, char **argv){
     if(argc > 1){ yyin = fopen(argv[1], "r");
     } else{ yyin = stdin; }
 }
-/*
-    insert_node() function
-*/
+/*************
+    MAIN
+*************/
 int main(int argc, char **argv) {
   manejo_entrada(argc, argv);
   yyparse();
