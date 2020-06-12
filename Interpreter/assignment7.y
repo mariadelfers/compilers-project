@@ -358,7 +358,7 @@ struct SymbolTable *table_ptr, struct SyntacticNode *root_ptr){
   struct SymbolTable* new_node = (struct SymbolTable*) malloc(sizeof(struct SymbolTable));
   new_node -> name = (char *) malloc(strlen(var_name) + 1);
   strcpy (new_node->name, var_name);
-  new_node -> type = var_type;
+  new_node -> node_type = var_type;
   new_node -> return_type = type_return;
   new_node -> value.itype = 0;
   new_node -> table_ptr = table_ptr;
@@ -521,7 +521,7 @@ struct SyntacticNode {
 */
 struct SyntacticNode* add_node(int ivalue, double fvalue, char* id_name, 
   int node_type, int head_type_node, struct SyntacticNode* ptr1, struct SyntacticNode* ptr2, 
-  struct SyntacticNode* ptr4, struct SyntacticNode* ptr4, struct SyntacticNode* next_node){
+  struct SyntacticNode* ptr3, struct SyntacticNode* ptr4, struct SyntacticNode* next_node){
     struct SyntacticNode* new_node = (struct SyntacticNode*) malloc(sizeof(struct SyntacticNode));
     new_node->node_type = node_type;
     new_node->head_type_node = head_type_node;
@@ -618,7 +618,7 @@ int int_expression(struct SyntacticNode* node){
   } 
   else if(node->node_type == ID_VALUE){
     struct SymbolTable *current_node = get_table(node->value.id_name);
-    assert(current_node->type == VALOR_INT_);
+    assert(current_node->node_type == VALOR_INT_);
     return_value = current_node->value.itype;
   } 
   else if(node->node_type == FUNCTION_VALUE){
@@ -685,7 +685,7 @@ int count_nodes(int type_node, struct SyntacticNode* node){
   }
   int i = 0;
   for(i = 0; i < 4; i++){ 
-    counter += count_nodes(type_node, nodo->array_ptr[i]); 
+    counter += count_nodes(type_node, node->array_ptr[i]); 
   }
   return counter;
 }
