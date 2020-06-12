@@ -88,14 +88,12 @@ char* Nombres_Tipos_De_Nodos_Arbol_Sintactico[] = {
 struct SymbolTable *function_head;
 struct SymbolTable *table_head;
 
-void insert_table(struct SymbolTable**, char const *, int, int, 
-struct SymbolTable*, struct SymbolTable*);
+void insert_table(struct SymbolTable**, char const *, int, int, struct SymbolTable*, struct SymbolTable*);
 void display_table(struct SymbolTable *, char*);
 
 /* Syntactic tree functions */
-struct SyntacticNode* add_node(int, double, char*, int, int, 
-  struct SyntacticNode*, struct SyntacticNode*, struct SyntacticNode*,
-  struct SyntacticNode*, struct SyntacticNode*);
+struct SyntacticNode* add_node(int, double, char*, int, int, struct SyntacticNode*, struct SyntacticNode*, 
+  struct SyntacticNode*, struct SyntacticNode*, struct SyntacticNode*);
 struct Funcion_En_Uso *stack_ptr;
 void print_tree(struct SyntacticNode*, char*);
 void imprime_Arbol_Sintactico(struct SyntacticNode*);
