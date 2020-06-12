@@ -85,12 +85,10 @@ char* Type_node_label[] = {
   "RETURN"};
 
 /* Symbol table functions */
-struct SymbolTable *function_head;
-struct SymbolTable *table_head;
-
 void insert_table(struct SymbolTable**, char const *, int, int, struct SymbolTable*, struct SymbolTable*);
 void display_table(struct SymbolTable *, char*);
-
+struct SymbolTable *table_head;
+struct SymbolTable *function_head;
 /* Syntactic tree functions */
 struct SyntacticNode* add_node(int, double, char*, int, int, struct SyntacticNode*, struct SyntacticNode*, 
   struct SyntacticNode*, struct SyntacticNode*, struct SyntacticNode*);
@@ -98,8 +96,8 @@ struct FunctionNode *function_ptr;
 void print_tree(struct SyntacticNode*, char*);
 void display_tree(struct SyntacticNode*);
 void cover_tree(struct SyntacticNode*);
-void get_function();
-void set_function(struct SymbolTable*);
+void get_a_function();
+void set_a_function(struct SymbolTable*);
 void aux_function(struct SyntacticNode*);
 
 %}
@@ -469,9 +467,9 @@ void get_float_table(char const *var_name, double new_value){
   }
 }
 /*
-    set_function() function
+    set_a_function() function
 */
-void set_function(struct SymbolTable* ptr){
+void set_a_function(struct SymbolTable* ptr){
   struct FunctionNode *new_function_ptr = (struct FunctionNode*) malloc(sizeof(struct FunctionNode));
   new_function_ptr -> node_ptr = ptr;
   new_function_ptr -> stack_ptr = function_ptr;
@@ -480,9 +478,9 @@ void set_function(struct SymbolTable* ptr){
   function_ptr = new_function_ptr;
 }
 /*
-    get_function() function
+    get_a_function() function
 */
-void get_function(){
+void get_a_function(){
   struct FunctionNode* temp = function_ptr;
   function_ptr = function_ptr -> stack_ptr;
   free(temp);
@@ -626,7 +624,7 @@ int int_expression(struct SyntacticNode* node){
     struct SymbolTable* current_function = check_table(node->value.id_name, function_head);
     assert(current_function->return_type == VALOR_INT_);    
     return_value = function_ptr->value.itype;
-    get_function();
+    get_a_function();
   }
   return return_value;
 }
@@ -662,7 +660,7 @@ double float_expression(struct SyntacticNode* node){
     struct SymbolTable* current_function = check_table(node->value.id_name, function_head);
     assert(current_function->return_type == VALOR_FLOAT_);    
     return_value = function_ptr->value.ftype;
-    get_function();
+    get_a_function();
   }
   return return_value;
 }
@@ -835,7 +833,7 @@ void aux_function(struct SyntacticNode* node){
   }
   set_param(node);
   struct SymbolTable* var_function = check_table(node->value.id_name, function_head);
-  set_function(var_function);
+  set_a_function(var_function);
   print_call_function();
   cover_tree(var_function->root_ptr);
 }
@@ -863,7 +861,7 @@ void print_function(struct SyntacticNode* node) {
         assert(current_function->return_type == VALOR_FLOAT_);
         printf("%lf\n", function_ptr->value.ftype);
       }
-      get_function();
+      get_a_function();
     } 
     else{ 
       if(is_int(node->array_ptr[0])){ 
