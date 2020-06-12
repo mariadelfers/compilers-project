@@ -107,7 +107,7 @@ void aux_function(struct SyntacticNode*);
 %start prog 
 
 %union { 
-  int valor_int; 
+  int itype; 
   double ftype; 
   char* id_name; 
   struct SyntacticNode* arbol_valor; 
@@ -176,7 +176,7 @@ void aux_function(struct SyntacticNode*);
 %type <arbol_valor> IDENTIFIER
 %type <arbol_valor> ASCII_PARENTHESES_1
 %type <arbol_valor> ASCII_PARENTHESES_2
-%type <valor_int> tipo
+%type <itype> tipo
 %type <arbol_valor> opt_args
 %type <arbol_valor> arg_lst
 
@@ -320,7 +320,7 @@ void manejador_De_Errores(int codigo_Error, char *texto_Error){
 /* Symbol table structure */
 struct SymbolTable {
   char *name;
-  int type;
+  int node_type;
   int return_type;
   union { 
     int itype; 
@@ -403,14 +403,14 @@ void print_node_table(struct SymbolTable *node){
   if(node == NULL) return;
 
   printf("Simbolo \t\t\t=\t%s\n", node->name);
-  if(node->type < sizeof(Type_node_label)){ 
-    printf("Tipo \t\t\t\t=\t%s\n", Type_node_label[node->type]);
+  if(node->node_type < sizeof(Type_node_label)){ 
+    printf("Tipo \t\t\t\t=\t%s\n", Type_node_label[node->node_type]);
   } 
   else { 
-    printf("Tipo \t\t\t\t=\t%d\n", node->type); 
+    printf("Tipo \t\t\t\t=\t%d\n", node->node_type); 
   }
 
-  switch(node->type){
+  switch(node->node_type){
     case VALOR_INT_:
       printf("Valor \t\t\t\t=\t%d\n", node->value.itype);
       break;
@@ -443,7 +443,7 @@ void display_table(struct SymbolTable* top_table_ptr, char* name_table){
 void get_int_table(char const *var_name, int new_value){
   struct SymbolTable *ptr = get_table(var_name);
   if(ptr != NULL){
-    if(ptr -> type == VALOR_INT_){ 
+    if(ptr -> node_type == VALOR_INT_){ 
       ptr -> value.itype = new_value;
     } 
     else{ 
@@ -460,7 +460,7 @@ void get_int_table(char const *var_name, int new_value){
 void get_float_table(char const *var_name, double new_value){
   struct SymbolTable *ptr = get_table(var_name);
   if(ptr != NULL){
-    if(ptr -> type == VALOR_FLOAT_){ 
+    if(ptr -> node_type == VALOR_FLOAT_){ 
       ptr -> value.ftype = new_value;
     } 
     else{ 
