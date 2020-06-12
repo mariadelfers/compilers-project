@@ -85,7 +85,7 @@ char* Type_node_label[] = {
   "RETURN"};
 
 /* Symbol table functions */
-void insert_table(struct SymbolTable**, char const *, int, int, struct SymbolTable*, struct SymbolTable*);
+void insert_table(struct SymbolTable**, char const *, int, int, struct SymbolTable*, struct SyntacticNode*);
 void display_table(struct SymbolTable *, char*);
 struct SymbolTable *table_head;
 struct SymbolTable *function_head;
