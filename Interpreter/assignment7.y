@@ -53,7 +53,8 @@ enum Type_nodes {
   ID_VALUE, 
   FUNCTION_VALUE, 
   PARAMETER_VALUE, 
-  RETURN
+  RETURN,
+  ARG_LST
 };
 /* Name of types node of the syntactic tree */
 char* Type_node_label[] = {
@@ -90,7 +91,8 @@ char* Type_node_label[] = {
   "ID_VALUE", 
   "FUNCTION_VALUE", 
   "PARAMETER_VALUE", 
-  "RETURN"
+  "RETURN",
+  "ARG_LST"
 };
 
 /* Symbol table functions */
