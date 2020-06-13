@@ -34,19 +34,19 @@ print       {return RETURN_PRINT;}
 fun         {return RETURN_FUNCTION;}
 return      {return RETURN_RETURN;}
 "<-"        {return ASCII_SET;}
-"="         {return ASCII_EQUAL;}
-"<"         {return ASCII_LESSTHAN;}
-">"         {return ASCII_GREATTHAN;}
-";"         {return ASCII_SCOLON;}
-":"         {return ASCII_COLON;}
-"<="        {return ASCII_LESSEQUAL;}
-">="        {return ASCII_GREATEQUAL;}
-"+"         {return ASCII_ADD;}
-"-"         {return ASCII_SUBSTRACT;}
-"*"         {return ASCII_MULTIPLY;}
-"/"         {return ASCII_SLASH;}
-"("         {return ASCII_PARENTHESES_1;}
-")"         {return ASCII_PARENTHESES_2;}
+"="         {return EQUAL_SIGN;}
+"<"         {return SMALLER_THAN_SIGN;}
+">"         {return BIGGER_THAN_SIGN;}
+";"         {return SEMICOLON;}
+":"         {return TWO_POINTS;}
+"<="        {return SMALLER_EQUAL_SIGN;}
+">="        {return BIGGER_EQUAL_SIGN;}
+"+"         {return PLUS_SIGN;}
+"-"         {return MINUS_SIGN;}
+"*"         {return MULTIPLICATION_SIGN;}
+"/"         {return DIVISION_SIGN;}
+"("         {return OPEN_PARENTHESES;}
+")"         {return CLOSE_PARENTHESES;}
 ","         {return ASCII_COMMA;}
 
 ("-")?{DIGIT}* {yylval.itype = atoi(yytext); return INTEGER_NUMBER;}

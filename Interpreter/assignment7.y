@@ -115,9 +115,9 @@ void aux_function(struct SyntacticNode*);
 %token RETURN_BEGIN
 %token RETURN_END
 %token IDENTIFIER
-%token ASCII_SCOLON
+%token SEMICOLON
 %token RETURN_VARIABLE
-%token ASCII_COLON 
+%token TWO_POINTS 
 %token RETURN_INT
 %token RETURN_FLOAT
 %token INTEGER_NUMBER
@@ -126,19 +126,19 @@ void aux_function(struct SyntacticNode*);
 %token RETURN_READ
 %token RETURN_PRINT 
 %token RETURN_IF
-%token ASCII_PARENTHESES_1
-%token ASCII_PARENTHESES_2
+%token OPEN_PARENTHESES
+%token CLOSE_PARENTHESES
 %token RETURN_IFELSE
 %token RETURN_WHILE
-%token ASCII_ADD
-%token ASCII_SUBSTRACT
-%token ASCII_MULTIPLY
-%token ASCII_SLASH
-%token ASCII_LESSTHAN
-%token ASCII_GREATTHAN
-%token ASCII_EQUAL 
-%token ASCII_LESSEQUAL
-%token ASCII_GREATEQUAL
+%token PLUS_SIGN
+%token MINUS_SIGN
+%token MULTIPLICATION_SIGN
+%token DIVISION_SIGN
+%token SMALLER_THAN_SIGN
+%token BIGGER_THAN_SIGN
+%token EQUAL_SIGN 
+%token SMALLER_EQUAL_SIGN
+%token BIGGER_EQUAL_SIGN
 %token RETURN_FUNCTION
 %token ASCII_COMMA
 %token RETURN_RETURN
@@ -160,20 +160,20 @@ void aux_function(struct SyntacticNode*);
 %type <syntatic_type> RETURN_IF
 %type <syntatic_type> RETURN_IFELSE 
 %type <syntatic_type> RETURN_WHILE
-%type <syntatic_type> ASCII_ADD
-%type <syntatic_type> ASCII_SUBSTRACT
-%type <syntatic_type> ASCII_MULTIPLY 
-%type <syntatic_type> ASCII_SLASH
-%type <syntatic_type> ASCII_LESSTHAN
-%type <syntatic_type> ASCII_GREATTHAN
-%type <syntatic_type> ASCII_EQUAL
-%type <syntatic_type> ASCII_LESSEQUAL
-%type <syntatic_type> ASCII_GREATEQUAL
+%type <syntatic_type> PLUS_SIGN
+%type <syntatic_type> MINUS_SIGN
+%type <syntatic_type> MULTIPLICATION_SIGN 
+%type <syntatic_type> DIVISION_SIGN
+%type <syntatic_type> SMALLER_THAN_SIGN
+%type <syntatic_type> BIGGER_THAN_SIGN
+%type <syntatic_type> EQUAL_SIGN
+%type <syntatic_type> SMALLER_EQUAL_SIGN
+%type <syntatic_type> BIGGER_EQUAL_SIGN
 %type <syntatic_type> INTEGER_NUMBER
 %type <syntatic_type> FLOATING_POINT_NUMBER
 %type <syntatic_type> IDENTIFIER
-%type <syntatic_type> ASCII_PARENTHESES_1
-%type <syntatic_type> ASCII_PARENTHESES_2
+%type <syntatic_type> OPEN_PARENTHESES
+%type <syntatic_type> CLOSE_PARENTHESES
 %type <itype> type
 %type <syntatic_type> opt_args
 %type <syntatic_type> arg_lst
@@ -191,10 +191,10 @@ prog: optional_declarations  optional_function_declarations RETURN_BEGIN optiona
 optional_declarations: declarations  
     | /* */ 
     ;
-declarations: declaration ASCII_SCOLON declarations  
+declarations: declaration SEMICOLON declarations  
     | declaration
     ;
-declaration: RETURN_VARIABLE IDENTIFIER ASCII_COLON type { 
+declaration: RETURN_VARIABLE IDENTIFIER TWO_POINTS type { 
       insert_table(&function_head, (char*)$2, $4, NINGUNO, NULL, NULL); 
     };
 type: RETURN_INT { $$ = VALOR_INT_; }
@@ -203,10 +203,10 @@ type: RETURN_INT { $$ = VALOR_INT_; }
 optional_function_declarations: function_declarations 
     | /* */
     ;
-function_declarations: function_declaration ASCII_SCOLON function_declarations 
+function_declarations: function_declaration SEMICOLON function_declarations 
     | function_declaration
     ;
-function_declaration: RETURN_FUNCTION IDENTIFIER ASCII_PARENTHESES_1 optional_params ASCII_PARENTHESES_2 ASCII_COLON type optional_declarations_for_function RETURN_BEGIN optional_statements RETURN_END {
+function_declaration: RETURN_FUNCTION IDENTIFIER OPEN_PARENTHESES optional_params CLOSE_PARENTHESES TWO_POINTS type optional_declarations_for_function RETURN_BEGIN optional_statements RETURN_END {
       insert_table(&function_head, (char*)$2, FUNCTION_VALUE, $7, table_head, $10);
 	    table_head = NULL;
     };
@@ -216,16 +216,16 @@ optional_params: param_list
 param_list: param ASCII_COMMA param_list 
     | param
     ;
-param: IDENTIFIER ASCII_COLON type { 
+param: IDENTIFIER TWO_POINTS type { 
       insert_table(&table_head, (char*)$1, $3, NINGUNO, NULL, NULL); 
     };
 optional_declarations_for_function: declarations_for_function 
     | /* */
     ;
-declarations_for_function: declaration_for_function ASCII_SCOLON declarations_for_function 
+declarations_for_function: declaration_for_function SEMICOLON declarations_for_function 
     | declaration_for_function
     ;
-declaration_for_function: RETURN_VARIABLE IDENTIFIER ASCII_COLON type { 
+declaration_for_function: RETURN_VARIABLE IDENTIFIER TWO_POINTS type { 
       insert_table(&table_head, (char*)$2, $4, NINGUNO, NULL, NULL); 
     };
 
@@ -233,13 +233,13 @@ statement: IDENTIFIER ASCII_SET expr {
       struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$1, ID_VALUE, SET, NULL, NULL, NULL, NULL, NULL);
 	    $$ = add_node(NINGUNO, NINGUNO, NULL, SET, STATEMENT, idNode, $3, NULL, NULL, NULL); 
     }
-	  | RETURN_IF ASCII_PARENTHESES_1 expresion ASCII_PARENTHESES_2 statement { 
+	  | RETURN_IF OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, IF, STATEMENT, $3, $5, NULL, NULL, NULL); 
     }
-	  | RETURN_IFELSE ASCII_PARENTHESES_1 expresion ASCII_PARENTHESES_2 statement statement { 
+	  | RETURN_IFELSE OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement statement { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, IFELSE, STATEMENT, $3, $5, $6, NULL, NULL); 
     }
-	  | RETURN_WHILE ASCII_PARENTHESES_1 expresion ASCII_PARENTHESES_2 statement { 
+	  | RETURN_WHILE OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, WHILE, STATEMENT, $3, $5, NULL, NULL, NULL); 
     }
 	  | RETURN_READ IDENTIFIER { 
@@ -259,45 +259,45 @@ statement: IDENTIFIER ASCII_SET expr {
 optional_statements: statement_list { $$ = $1; }
 	  | /* */ { $$ = NULL; }
     ;
-statement_list: statement ASCII_SCOLON statement_list { 
+statement_list: statement SEMICOLON statement_list { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, STATEMENT_LIST, STATEMENT_LIST, $3, $1, NULL, NULL, NULL); 
     }
 	  | statement { $$ = $1; }
     ;
 expresion: expr { $$ = 1; }
-    | expr ASCII_LESSTHAN expr { 
+    | expr SMALLER_THAN_SIGN expr { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, LESSTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
-    | expr ASCII_GREATTHAN expr { 
+    | expr BIGGER_THAN_SIGN expr { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, GREATTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
-    | expr ASCII_EQUAL expr { 
+    | expr EQUAL_SIGN expr { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, EQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
-    | expr ASCII_LESSEQUAL expr { 
+    | expr SMALLER_EQUAL_SIGN expr { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, LESSEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
-    | expr ASCII_GREATEQUAL expr { 
+    | expr BIGGER_EQUAL_SIGN expr { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, GREATEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
     ;
-expr: expr ASCII_ADD term { 
+expr: expr PLUS_SIGN term { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, ADD, EXPR, $1, $3, NULL, NULL, NULL); 
     }
-	  | expr ASCII_SUBSTRACT term { 
+	  | expr MINUS_SIGN term { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, SUBSTRACT, EXPR, $1, $3, NULL, NULL, NULL); 
     }
 	  | term { $$ = $1; }
     ;
-term: term ASCII_MULTIPLY factor { 
+term: term MULTIPLICATION_SIGN factor { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, MULTIPLY, TERM, $1, $3, NULL, NULL, NULL); 
     }
-    | term ASCII_SLASH factor { 
+    | term DIVISION_SIGN factor { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, SLASH, TERM, $1, $3, NULL, NULL, NULL); 
     }
     | factor { $$ = $1; }
     ; 
-factor: ASCII_PARENTHESES_1 expr ASCII_PARENTHESES_2 { $$ = $2; }
+factor: OPEN_PARENTHESES expr CLOSE_PARENTHESES { $$ = $2; }
     | IDENTIFIER { 
       $$ = add_node(NINGUNO, NINGUNO, (char *)$1, ID_VALUE, FACTOR, NULL, NULL, NULL, NULL, NULL); 
     }
@@ -307,7 +307,7 @@ factor: ASCII_PARENTHESES_1 expr ASCII_PARENTHESES_2 { $$ = $2; }
     | FLOATING_POINT_NUMBER{ 
       $$ = add_node(NINGUNO, ftype, NULL, VALOR_FLOAT_, TERM, NULL, NULL, NULL, NULL, NULL); 
     }
-    | IDENTIFIER ASCII_PARENTHESES_1 opt_args ASCII_PARENTHESES_2 { 
+    | IDENTIFIER OPEN_PARENTHESES opt_args CLOSE_PARENTHESES { 
       $$ = add_node(NINGUNO, NINGUNO, (char *)$1, FUNCTION_VALUE, TERM, $3, NULL, NULL, NULL, NULL); 
     }
     ;
