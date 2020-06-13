@@ -9,8 +9,8 @@ program get_factorial
 
     while (num > 0)
     {
-        total = toal * num;
-        num = num - 1;
+        set total toal * num;
+        set num num - 1;
     }
 
     print total;
