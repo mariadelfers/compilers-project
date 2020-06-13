@@ -48,11 +48,11 @@ enum Type_nodes {
   EQUAL, 
   LESSEQUAL, 
   GREATEQUAL,
-  SMALLER_THAN_SIGN,
-  BIGGER_THAN_SIGN,
-  EQUAL_SIGN,
-  SMALLER_EQUAL_SIGN,
-  BIGGER_EQUAL_SIGN,
+  SMALLER_THAN,
+  BIGGER_THAN,
+  EQUAL,
+  SMALLER_EQUAL,
+  BIGGER_EQUAL,
   VALOR_INT_, 
   VALOR_FLOAT_, 
   ID_VALUE, 
@@ -91,11 +91,11 @@ char* Type_node_label[] = {
   "EQUAL", 
   "LESSEQUAL", 
   "GREATEQUAL",
-  "SMALLER_THAN_SIGN",
-  "BIGGER_THAN_SIGN",
+  "SMALLER_THAN",
+  "BIGGER_THAN",
   "EQUAL_SIGN",
-  "SMALLER_EQUAL_SIGN",
-  "BIGGER_EQUAL_SIGN",
+  "SMALLER_EQUAL",
+  "BIGGER_EQUAL",
   "VALOR_INT_", 
   "VALOR_FLOAT_", 
   "ID_VALUE", 
@@ -293,7 +293,7 @@ iteration_statement: WHILE_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statem
     | FOR_R SET_R IDENTIFIER expr TO_R expr STEP_R expr DO_R statement {
       struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$3, ID_VALUE, FOR, NULL, NULL, NULL, NULL, NULL);
       struct SyntacticNode* setNode = add_node(NINGUNO, NINGUNO, NULL, SET, FOR, idNode, $4, NULL, NULL, NULL);
-      struct SyntacticNode* ltNode = add_node(NINGUNO, NINGUNO, NULL, SMALLER_EQUAL, EXPRESION, idNode, $6, NULL, NULL, NULL);
+      struct SyntacticNode* ltNode = add_node(NINGUNO, NINGUNO, NULL, LESSEQUAL, EXPRESION, idNode, $6, NULL, NULL, NULL);
       struct SyntacticNode* stepNode = add_node(NINGUNO, NINGUNO, NULL, ADD, EXPR, idNode, $8, NULL, NULL, NULL);
       struct SyntacticNode* setNode2 = add_node(NINGUNO, NINGUNO, NULL, SET, FOR, idNode, stepNode, NULL, NULL, NULL);
       $$ = add_node(NINGUNO, NINGUNO, NULL, FOR, ITERATION_STATEMENT, setNode, ltNode, setNode2, $10, NULL);
