@@ -21,18 +21,18 @@ DIGIT [0-9]
 NUMBERS [1-9]
 
 %%
-begin       {return RETURN_BEGIN;}
+begin     {return PROGRAM_R;}
 end         {return RETURN_END;}
-var         {return RETURN_VARIABLE;}
-int         {return RETURN_INT;}
-float       {return RETURN_FLOAT;}
-if          {return RETURN_IF;}
-ifelse      {return RETURN_IFELSE;}
-while       {return RETURN_WHILE;}
-read        {return RETURN_READ;}
-print       {return RETURN_PRINT;}
-fun         {return RETURN_FUNCTION;}
-return      {return RETURN_RETURN;}
+var         {return VAR_R;}
+int         {return INT_R;}
+float       {return FLOAT_R;}
+if          {return IF_R;}
+ifelse      {return IF_ELSE_R;}
+while       {return WHILE_R;}
+read        {return READ_R;}
+print       {return PRINT_R;}
+fun         {return FUNCTION_R;}
+return      {return RETURN_R;}
 "<-"        {return ASCII_SET;}
 "="         {return EQUAL_SIGN;}
 "<"         {return SMALLER_THAN_SIGN;}

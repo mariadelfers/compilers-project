@@ -112,24 +112,24 @@ void aux_function(struct SyntacticNode*);
   struct SymbolTable* table_type; 
 }
 /* Tokens */
-%token RETURN_BEGIN
+%token PROGRAM_R
 %token RETURN_END
 %token IDENTIFIER
 %token SEMICOLON
-%token RETURN_VARIABLE
+%token VAR_R
 %token TWO_POINTS 
-%token RETURN_INT
-%token RETURN_FLOAT
+%token INT_R
+%token FLOAT_R
 %token INTEGER_NUMBER
 %token FLOATING_POINT_NUMBER
 %token ASCII_SET
-%token RETURN_READ
-%token RETURN_PRINT 
-%token RETURN_IF
+%token READ_R
+%token PRINT_R 
+%token IF_R
 %token OPEN_PARENTHESES
 %token CLOSE_PARENTHESES
-%token RETURN_IFELSE
-%token RETURN_WHILE
+%token IF_ELSE_R
+%token WHILE_R
 %token PLUS_SIGN
 %token MINUS_SIGN
 %token MULTIPLICATION_SIGN
@@ -139,9 +139,9 @@ void aux_function(struct SyntacticNode*);
 %token EQUAL_SIGN 
 %token SMALLER_EQUAL_SIGN
 %token BIGGER_EQUAL_SIGN
-%token RETURN_FUNCTION
+%token FUNCTION_R
 %token ASCII_COMMA
-%token RETURN_RETURN
+%token RETURN_R
 /* Types */
 %type <syntatic_type> prog
 %type <syntatic_type> statement
@@ -151,15 +151,15 @@ void aux_function(struct SyntacticNode*);
 %type <syntatic_type> term
 %type <syntatic_type> factor
 %type <syntatic_type> expresion
-%type <syntatic_type> RETURN_BEGIN
+%type <syntatic_type> PROGRAM_R
 %type <syntatic_type> RETURN_END 
-%type <syntatic_type> RETURN_VARIABLE
+%type <syntatic_type> VAR_R
 %type <syntatic_type> ASCII_SET
-%type <syntatic_type> RETURN_READ
-%type <syntatic_type> RETURN_PRINT
-%type <syntatic_type> RETURN_IF
-%type <syntatic_type> RETURN_IFELSE 
-%type <syntatic_type> RETURN_WHILE
+%type <syntatic_type> READ_R
+%type <syntatic_type> PRINT_R
+%type <syntatic_type> IF_R
+%type <syntatic_type> IF_ELSE_R 
+%type <syntatic_type> WHILE_R
 %type <syntatic_type> PLUS_SIGN
 %type <syntatic_type> MINUS_SIGN
 %type <syntatic_type> MULTIPLICATION_SIGN 
@@ -180,7 +180,7 @@ void aux_function(struct SyntacticNode*);
 
 %%
 
-prog: optional_declarations  optional_function_declarations RETURN_BEGIN optional_statements RETURN_END {
+prog: optional_declarations  optional_function_declarations PROGRAM_R optional_statements RETURN_END {
     struct SyntacticNode* raiz_Arbol_Sintactico;
     raiz_Arbol_Sintactico = add_node(NINGUNO, NINGUNO, NULL, BEGIN, NINGUNO, $4, NULL, NULL, NULL, NULL);
     print_tree(raiz_Arbol_Sintactico, "main");
@@ -194,11 +194,11 @@ optional_declarations: declarations
 declarations: declaration SEMICOLON declarations  
     | declaration
     ;
-declaration: RETURN_VARIABLE IDENTIFIER TWO_POINTS type { 
+declaration: VAR_R IDENTIFIER TWO_POINTS type { 
       insert_table(&function_head, (char*)$2, $4, NINGUNO, NULL, NULL); 
     };
-type: RETURN_INT { $$ = VALOR_INT_; }
-    | RETURN_FLOAT { $$ = VALOR_FLOAT_; }
+type: INT_R { $$ = VALOR_INT_; }
+    | FLOAT_R { $$ = VALOR_FLOAT_; }
     ;
 optional_function_declarations: function_declarations 
     | /* */
@@ -206,7 +206,7 @@ optional_function_declarations: function_declarations
 function_declarations: function_declaration SEMICOLON function_declarations 
     | function_declaration
     ;
-function_declaration: RETURN_FUNCTION IDENTIFIER OPEN_PARENTHESES optional_params CLOSE_PARENTHESES TWO_POINTS type optional_declarations_for_function RETURN_BEGIN optional_statements RETURN_END {
+function_declaration: FUNCTION_R IDENTIFIER OPEN_PARENTHESES optional_params CLOSE_PARENTHESES TWO_POINTS type optional_declarations_for_function PROGRAM_R optional_statements RETURN_END {
       insert_table(&function_head, (char*)$2, FUNCTION_VALUE, $7, table_head, $10);
 	    table_head = NULL;
     };
@@ -225,7 +225,7 @@ optional_declarations_for_function: declarations_for_function
 declarations_for_function: declaration_for_function SEMICOLON declarations_for_function 
     | declaration_for_function
     ;
-declaration_for_function: RETURN_VARIABLE IDENTIFIER TWO_POINTS type { 
+declaration_for_function: VAR_R IDENTIFIER TWO_POINTS type { 
       insert_table(&table_head, (char*)$2, $4, NINGUNO, NULL, NULL); 
     };
 
@@ -233,26 +233,26 @@ statement: IDENTIFIER ASCII_SET expr {
       struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$1, ID_VALUE, SET, NULL, NULL, NULL, NULL, NULL);
 	    $$ = add_node(NINGUNO, NINGUNO, NULL, SET, STATEMENT, idNode, $3, NULL, NULL, NULL); 
     }
-	  | RETURN_IF OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement { 
+	  | IF_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, IF, STATEMENT, $3, $5, NULL, NULL, NULL); 
     }
-	  | RETURN_IFELSE OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement statement { 
+	  | IF_ELSE_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement statement { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, IFELSE, STATEMENT, $3, $5, $6, NULL, NULL); 
     }
-	  | RETURN_WHILE OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement { 
+	  | WHILE_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, WHILE, STATEMENT, $3, $5, NULL, NULL, NULL); 
     }
-	  | RETURN_READ IDENTIFIER { 
+	  | READ_R IDENTIFIER { 
       struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$2, ID_VALUE, READ, NULL, NULL, NULL, NULL, NULL);
 	    $$ = add_node(NINGUNO, NINGUNO, NULL, READ, STATEMENT, idNode, NULL, NULL, NULL, NULL);                  
 	  }
-    | RETURN_PRINT expr { 
+    | PRINT_R expr { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, PRINT, STATEMENT, $2, NULL, NULL, NULL, NULL); 
     }
-    | RETURN_BEGIN optional_statements RETURN_END { 
+    | PROGRAM_R optional_statements RETURN_END { 
       $$ = $2; 
     }
-    | RETURN_RETURN expr { 
+    | RETURN_R expr { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, RETURN, STATEMENT, $2, NULL, NULL, NULL, NULL); 
     }
     ;
