@@ -1,0 +1,17 @@
+program get_factorial
+{
+    var num : int;
+    var total : int
+}
+{
+    set total 1;
+    read num;
+
+    while (num > 0)
+    {
+        total = toal * num;
+        num = num - 1;
+    }
+
+    print total;
+}
