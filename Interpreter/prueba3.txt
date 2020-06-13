@@ -15,12 +15,5 @@ program tres
      set y z;
    }
 
-   set z 0;
-   while (x < y)
-   {
-     set z z + y;
-     set x x + 1;
-   }
-
    print z;
 }

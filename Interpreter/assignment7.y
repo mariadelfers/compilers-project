@@ -217,10 +217,11 @@ program: PROGRAM_R IDENTIFIER OPEN_BRACKET optional_declarations optional_functi
 CLOSE_BRACKET statement {
     struct SyntacticNode* raiz_Arbol_Sintactico;
     raiz_Arbol_Sintactico = add_node(NINGUNO, NINGUNO, NULL, BEGIN, NINGUNO, $7, NULL, NULL, NULL, NULL);
-    print_tree(raiz_Arbol_Sintactico, "main");
-    display_table(function_head, "main");
-    printf(" OUTPUT \n\n");
+    //print_tree(raiz_Arbol_Sintactico, "main");
+    //display_table(function_head, "main");
+    //printf(" OUTPUT \n\n");
     cover_tree(raiz_Arbol_Sintactico);
+display_table(function_head, "main");
     };
 optional_declarations: declarations  
     | /* */ 
@@ -264,7 +265,7 @@ statement: assign_statement { $$ = $1; }
     | cmp_statement { $$ = $1; }
     ;
 assign_statement: SET_R IDENTIFIER  expr  SEMICOLON{ 
-      struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$1, ID_VALUE, SET, NULL, NULL, NULL, NULL, NULL);
+      struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$2, ID_VALUE, SET, NULL, NULL, NULL, NULL, NULL);
 	    $$ = add_node(NINGUNO, NINGUNO, NULL, SET, STATEMENT, idNode, $3, NULL, NULL, NULL); 
     }
 	  | READ_R IDENTIFIER SEMICOLON{ 
@@ -421,7 +422,6 @@ int get_flag(){
 */
 void insert_table(struct SymbolTable** ptr_ptr_table, char const *var_name, int var_type, int type_return, 
 struct SymbolTable *table_ptr, struct SyntacticNode *root_ptr){
-  
   struct SymbolTable* new_node = (struct SymbolTable*) malloc(sizeof(struct SymbolTable));
   new_node -> name = (char *) malloc(strlen(var_name) + 1);
   strcpy (new_node->name, var_name);
@@ -469,35 +469,36 @@ struct SymbolTable* get_table(char const *var_name){
 void print_node_table(struct SymbolTable *node){
   if(node == NULL) return;
 
-  printf("Simbolo \t\t\t=\t%s\n", node->name);
+  printf("   %s\t", node->name);
   if(node->node_type < sizeof(Type_node_label)){ 
-    printf("Tipo \t\t\t\t=\t%s\n", Type_node_label[node->node_type]);
+    printf("%s", Type_node_label[node->node_type]);
   } 
   else { 
-    printf("Tipo \t\t\t\t=\t%d\n", node->node_type); 
+    printf("%s", node->node_type); 
   }
 
   switch(node->node_type){
     case VALOR_INT_:
-      printf("Valor \t\t\t\t=\t%d\n", node->value.itype);
+      printf("\t%d\n", node->value.itype);
       break;
     case VALOR_FLOAT_:
-      printf("Valor \t\t\t\t=\t%lf\n", node->value.ftype);
+      printf("\t%lf\n", node->value.ftype);
       break;
     case FUNCTION_VALUE:
       assert(node->return_type < sizeof(Type_node_label));
-      printf("Tipo regresado \t\t=\t%s\n\n", Type_node_label[node->return_type]);
+      printf("\t%s\n", Type_node_label[node->return_type]);
       display_table(node->table_ptr, node->name);
       print_tree(node->root_ptr, node->name);
       break;
   }
-  printf("Siguiente puntero \t\t=\t%p\n\n", node->next);
+  //printf("Siguiente puntero \t\t=\t%p\n\n", node->next);
 }
 /*
     display_table() function
 */
 void display_table(struct SymbolTable* top_table_ptr, char* name_table){
-  printf(" TABLA DE SIMBOLOS %s \n\n", name_table);
+  printf(" TABLA DE SIMBOLOS (%s) \n\n", name_table);
+  printf(" Simbolo  |   Tipo    |  Valor\n");
   struct SymbolTable *current_ptr = top_table_ptr;
   while(current_ptr != NULL){
     print_node_table(current_ptr);
@@ -505,13 +506,14 @@ void display_table(struct SymbolTable* top_table_ptr, char* name_table){
   }
 }
 /*
-    get_int_table() function
+    set_int_table() function
 */
-void get_int_table(char const *var_name, int new_value){
+void set_int_table(char const *var_name, int new_value){
   struct SymbolTable *ptr = get_table(var_name);
   if(ptr != NULL){
-    if(ptr -> node_type == VALOR_INT_){ 
+    if(ptr -> node_type == VALOR_INT_){  
       ptr -> value.itype = new_value;
+//printf("[%s = %d]\n", ptr->name, ptr->value.itype);
     } 
     else{ 
       error_handle(INVALID_INT , MESSAGE_INVALID_INT); 
@@ -522,9 +524,9 @@ void get_int_table(char const *var_name, int new_value){
   }
 }
 /*
-    get_float_table() function
+    set_float_table() function
 */
-void get_float_table(char const *var_name, double new_value){
+void set_float_table(char const *var_name, double new_value){
   struct SymbolTable *ptr = get_table(var_name);
   if(ptr != NULL){
     if(ptr -> node_type == VALOR_FLOAT_){ 
@@ -1032,12 +1034,12 @@ void set_function(struct SyntacticNode* node){
   switch(current_node->node_type){
     case VALOR_INT_:
       set_ivalue = int_expression(node->array_ptr[1]);
-      get_int_table(current_node->name, set_ivalue);
+      set_int_table(current_node->name, set_ivalue);
       assert(set_ivalue == current_node->value.itype);
       break;
     case VALOR_FLOAT_:
       set_fvalue = float_expression(node->array_ptr[1]);
-      get_float_table(current_node->name, set_fvalue);
+      set_float_table(current_node->name, set_fvalue);
       assert(set_fvalue == current_node->value.ftype);
       break;
   }
@@ -1047,7 +1049,7 @@ void set_function(struct SyntacticNode* node){
 */
 int read_int(){
   int new_value = -1;
-  printf("Asigna valor a Int = ");
+  printf("Asigna valor entero = ");
   int x = scanf("%d", &new_value);
   assert(x > 0);
   return new_value;
@@ -1057,7 +1059,7 @@ int read_int(){
 */
 double read_float(){
   double new_value = -1.0;
-  printf("Asigna valor a Float = ");
+  printf("Asigna valor flotante = ");
   int x = scanf("%lf", &new_value);
   assert(x > 0);
   return new_value;
@@ -1073,12 +1075,12 @@ void read_function(struct SyntacticNode* node){
   switch(current_node->node_type){
     case VALOR_INT_:
       set_ivalue = read_int();
-      get_int_table(current_node->name, set_ivalue);
+      set_int_table(current_node->name, set_ivalue);
       assert(set_ivalue == current_node->value.itype);
       break;
     case VALOR_FLOAT_:
       set_fvalue = read_float();
-      get_float_table(current_node->name, set_fvalue);
+      set_float_table(current_node->name, set_fvalue);
       assert(set_fvalue == current_node->value.ftype);
       break;
   }
