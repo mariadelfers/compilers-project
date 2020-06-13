@@ -174,7 +174,7 @@ void aux_function(struct SyntacticNode*);
 %type <syntatic_type> IDENTIFIER
 %type <syntatic_type> ASCII_PARENTHESES_1
 %type <syntatic_type> ASCII_PARENTHESES_2
-%type <itype> tipo
+%type <itype> type
 %type <syntatic_type> opt_args
 %type <syntatic_type> arg_lst
 
