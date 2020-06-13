@@ -51,7 +51,6 @@ enum Type_nodes {
   FUNCTION_VALUE, 
   PARAMETER_VALUE, 
   ARG_LST, 
-  END, 
   RETURN
 };
 /* Name of types node of the syntactic tree */
@@ -87,8 +86,8 @@ char* Type_node_label[] = {
   "FUNCTION_VALUE", 
   "PARAMETER_VALUE", 
   "ARG_LST", 
-  "END", 
-  "RETURN"};
+  "RETURN"
+};
 
 /* Symbol table functions */
 void insert_table(struct SymbolTable**, char const *, int, int, struct SymbolTable*, struct SyntacticNode*);
@@ -167,7 +166,6 @@ void aux_function(struct SyntacticNode*);
 %type <syntatic_type> factor
 %type <syntatic_type> expresion
 %type <syntatic_type> PROGRAM_R
-%type <syntatic_type> RETURN_END 
 %type <syntatic_type> VAR_R
 %type <syntatic_type> TO_R
 %type <syntatic_type> STEP_R
@@ -196,8 +194,7 @@ void aux_function(struct SyntacticNode*);
 %type <syntatic_type> OPEN_BRACKET
 %type <syntatic_type> CLOSE_BRACKET
 %type <itype> type
-%type <syntatic_type> opt_args
-%type <syntatic_type> arg_lst
+
 
 %%
 
@@ -249,7 +246,7 @@ param: VAR_R IDENTIFIER TWO_POINTS type {
 statement: assign_statement { $$ = $1; }
     | if_statement { $$ = $1; }
     | iteration_statement { $$ = $1; }
-    | comparison_statement { $$ = $1; }
+    | cmp_statement { $$ = $1; }
     ;
 assign_statement: SET_R IDENTIFIER  expr  SEMICOLON{ 
       struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$1, ID_VALUE, SET, NULL, NULL, NULL, NULL, NULL);
