@@ -1,0 +1,4 @@
+program dos
+{
+	fun number(var i: int) :int
+}
