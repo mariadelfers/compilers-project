@@ -1,3 +1,0 @@
-var y : int
-begin
-end

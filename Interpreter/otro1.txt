@@ -1,5 +1,0 @@
-var x : int;
-var y : int
-begin
-  x <- y + 1
-end
