@@ -102,7 +102,7 @@ void aux_function(struct SyntacticNode*);
 
 %}
 
-%start prog 
+%start program
 
 %union { 
   int itype; 
@@ -113,21 +113,27 @@ void aux_function(struct SyntacticNode*);
 }
 /* Tokens */
 %token PROGRAM_R
-%token RETURN_END
 %token IDENTIFIER
 %token SEMICOLON
+%token COLON
 %token VAR_R
+%token TO_R
+%token STEP_R
+%token DO_R
+%token FOR_R
+%token SET_R
 %token TWO_POINTS 
 %token INT_R
 %token FLOAT_R
 %token INTEGER_NUMBER
 %token FLOATING_POINT_NUMBER
-%token ASCII_SET
 %token READ_R
 %token PRINT_R 
 %token IF_R
 %token OPEN_PARENTHESES
 %token CLOSE_PARENTHESES
+%token OPEN_BRACKET
+%token CLOSE_BRACKET
 %token IF_ELSE_R
 %token WHILE_R
 %token PLUS_SIGN
@@ -140,10 +146,9 @@ void aux_function(struct SyntacticNode*);
 %token SMALLER_EQUAL_SIGN
 %token BIGGER_EQUAL_SIGN
 %token FUNCTION_R
-%token ASCII_COMMA
 %token RETURN_R
 /* Types */
-%type <syntatic_type> prog
+%type <syntatic_type> program
 %type <syntatic_type> statement
 %type <syntatic_type> optional_statements
 %type <syntatic_type> statement_list
@@ -154,7 +159,11 @@ void aux_function(struct SyntacticNode*);
 %type <syntatic_type> PROGRAM_R
 %type <syntatic_type> RETURN_END 
 %type <syntatic_type> VAR_R
-%type <syntatic_type> ASCII_SET
+%type <syntatic_type> TO_R
+%type <syntatic_type> STEP_R
+%type <syntatic_type> DO_R
+%type <syntatic_type> FOR_R
+%type <syntatic_type> SET_R
 %type <syntatic_type> READ_R
 %type <syntatic_type> PRINT_R
 %type <syntatic_type> IF_R
@@ -174,15 +183,18 @@ void aux_function(struct SyntacticNode*);
 %type <syntatic_type> IDENTIFIER
 %type <syntatic_type> OPEN_PARENTHESES
 %type <syntatic_type> CLOSE_PARENTHESES
+%type <syntatic_type> OPEN_BRACKET
+%type <syntatic_type> CLOSE_BRACKET
 %type <itype> type
 %type <syntatic_type> opt_args
 %type <syntatic_type> arg_lst
 
 %%
 
-prog: optional_declarations  optional_function_declarations PROGRAM_R optional_statements RETURN_END {
+program: PROGRAM_R IDENTIFIER OPEN_BRACKET optional_declarations optional_function_declarations 
+CLOSE_BRACKET statement {
     struct SyntacticNode* raiz_Arbol_Sintactico;
-    raiz_Arbol_Sintactico = add_node(NINGUNO, NINGUNO, NULL, BEGIN, NINGUNO, $4, NULL, NULL, NULL, NULL);
+    raiz_Arbol_Sintactico = add_node(NINGUNO, NINGUNO, NULL, BEGIN, NINGUNO, $7, NULL, NULL, NULL, NULL);
     print_tree(raiz_Arbol_Sintactico, "main");
     display_table(function_head, "main");
     printf(" OUTPUT \n\n");
@@ -203,83 +215,74 @@ type: INT_R { $$ = VALOR_INT_; }
 optional_function_declarations: function_declarations 
     | /* */
     ;
-function_declarations: function_declaration SEMICOLON function_declarations 
+function_declarations: function_declarations function_declaration 
     | function_declaration
     ;
-function_declaration: FUNCTION_R IDENTIFIER OPEN_PARENTHESES optional_params CLOSE_PARENTHESES TWO_POINTS type optional_declarations_for_function PROGRAM_R optional_statements RETURN_END {
-      insert_table(&function_head, (char*)$2, FUNCTION_VALUE, $7, table_head, $10);
+function_declaration: FUNCTION_R IDENTIFIER OPEN_PARENTHESES optional_params CLOSE_PARENTHESES TWO_POINTS type OPEN_BRACKET optional_declarations CLOSE_BRACKET statement {
+      insert_table(&function_head, (char*)$2, FUNCTION_VALUE, $7, table_head, $11);
 	    table_head = NULL;
-    };
-optional_params: param_list 
+    }
+    | FUNCTION_R IDENTIFIER OPEN_PARENTHESES optional_params CLOSE_PARENTHESES TWO_POINTS type SEMICOLON{
+      insert_table(&function_head, (char*)$2, FUNCTION_VALUE, $7, table_head, NULL);
+	    table_head = NULL;
+    }
+    ;
+optional_params: params 
     | /* */
     ;
-param_list: param ASCII_COMMA param_list 
+params: param COLON params 
     | param
     ;
-param: IDENTIFIER TWO_POINTS type { 
-      insert_table(&table_head, (char*)$1, $3, NINGUNO, NULL, NULL); 
-    };
-optional_declarations_for_function: declarations_for_function 
-    | /* */
-    ;
-declarations_for_function: declaration_for_function SEMICOLON declarations_for_function 
-    | declaration_for_function
-    ;
-declaration_for_function: VAR_R IDENTIFIER TWO_POINTS type { 
+param: VAR_R IDENTIFIER TWO_POINTS type { 
       insert_table(&table_head, (char*)$2, $4, NINGUNO, NULL, NULL); 
     };
-
-statement: IDENTIFIER ASCII_SET expr { 
+statement: assign_statement { $$ = $1; }
+    | if_statement { $$ = $1; }
+    | iteration_statement { $$ = $1; }
+    | comparison_statement { $$ = $1; }
+    ;
+assign_statement: SET_R IDENTIFIER  expr  SEMICOLON{ 
       struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$1, ID_VALUE, SET, NULL, NULL, NULL, NULL, NULL);
 	    $$ = add_node(NINGUNO, NINGUNO, NULL, SET, STATEMENT, idNode, $3, NULL, NULL, NULL); 
     }
-	  | IF_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, IF, STATEMENT, $3, $5, NULL, NULL, NULL); 
-    }
-	  | IF_ELSE_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement statement { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, IFELSE, STATEMENT, $3, $5, $6, NULL, NULL); 
-    }
-	  | WHILE_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, WHILE, STATEMENT, $3, $5, NULL, NULL, NULL); 
-    }
-	  | READ_R IDENTIFIER { 
+	  | READ_R IDENTIFIER SEMICOLON{ 
       struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$2, ID_VALUE, READ, NULL, NULL, NULL, NULL, NULL);
 	    $$ = add_node(NINGUNO, NINGUNO, NULL, READ, STATEMENT, idNode, NULL, NULL, NULL, NULL);                  
 	  }
-    | PRINT_R expr { 
+    | PRINT_R expr SEMICOLON{ 
       $$ = add_node(NINGUNO, NINGUNO, NULL, PRINT, STATEMENT, $2, NULL, NULL, NULL, NULL); 
     }
-    | PROGRAM_R optional_statements RETURN_END { 
-      $$ = $2; 
-    }
-    | RETURN_R expr { 
+    | RETURN_R expr SEMICOLON{ 
       $$ = add_node(NINGUNO, NINGUNO, NULL, RETURN, STATEMENT, $2, NULL, NULL, NULL, NULL); 
     }
     ;
-optional_statements: statement_list { $$ = $1; }
-	  | /* */ { $$ = NULL; }
+if_statement: IF_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement {
+      $$ = add_node(NOTHING, NOTHING, NULL, IF, IF_STATEMENT, $3, $5, NULL, NULL, NULL);
+    }
+    | IF_ELSE_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement statement {
+      $$ = add_node(NOTHING, NOTHING, NULL, IFELSE, IFELSE_STATEMENT, $3, $5, $6, NULL, NULL);
+    }
     ;
-statement_list: statement SEMICOLON statement_list { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, STATEMENT_LIST, STATEMENT_LIST, $3, $1, NULL, NULL, NULL); 
+iteration_statement: WHILE_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement {
+      $$ = add_node(NOTHING, NOTHING, NULL, WHILE, ITERATION_STATEMENT, $3, $5, NULL, NULL, NULL);
     }
-	  | statement { $$ = $1; }
+    | FOR_R SET_R IDENTIFIER expr TO_R expr STEP_R expr DO_R statement {
+      struct SyntaxTreeNode* idNode = add_node(NOTHING, NOTHING, (char *)$3, ID_VALUE, FOR, NULL, NULL, NULL, NULL, NULL);
+      struct SyntaxTreeNode* setNode = add_node(NOTHING, NOTHING, NULL, SET, FOR, idNode, $4, NULL, NULL, NULL);
+      struct SyntaxTreeNode* ltNode = add_node(NOTHING, NOTHING, NULL, LEQ, EXPRESION, idNode, $6, NULL, NULL, NULL);
+      struct SyntaxTreeNode* stepNode = add_node(NOTHING, NOTHING, NULL, PLUS, EXPR, idNode, $8, NULL, NULL, NULL);
+      struct SyntaxTreeNode* setNode2 = add_node(NOTHING, NOTHING, NULL, SET, FOR, idNode, stepNode, NULL, NULL, NULL);
+      $$ = add_node(NOTHING, NOTHING, NULL, FOR, ITERATION_STATEMENT, setNode, ltNode, setNode2, $10, NULL);
+    }
     ;
-expresion: expr { $$ = 1; }
-    | expr SMALLER_THAN_SIGN expr { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, LESSTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
+cmp_statement: OPEN_BRACKET CLOSE_BRACKET { $$ = NULL; }
+    | OPEN_BRACKET statement_list CLOSE_BRACKET { $$ = $2; }
+    ;
+statement_list: statement { $$ = $1; }
+    | statement_list statement { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, STATEMENT_LIST, STATEMENT_LIST, $1, $2, NULL, NULL, NULL); 
     }
-    | expr BIGGER_THAN_SIGN expr { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, GREATTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
-    }
-    | expr EQUAL_SIGN expr { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, EQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
-    }
-    | expr SMALLER_EQUAL_SIGN expr { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, LESSEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
-    }
-    | expr BIGGER_EQUAL_SIGN expr { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, GREATEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
-    }
+	  | 
     ;
 expr: expr PLUS_SIGN term { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, ADD, EXPR, $1, $3, NULL, NULL, NULL); 
@@ -307,18 +310,34 @@ factor: OPEN_PARENTHESES expr CLOSE_PARENTHESES { $$ = $2; }
     | FLOATING_POINT_NUMBER{ 
       $$ = add_node(NINGUNO, ftype, NULL, VALOR_FLOAT_, TERM, NULL, NULL, NULL, NULL, NULL); 
     }
-    | IDENTIFIER OPEN_PARENTHESES opt_args CLOSE_PARENTHESES { 
+    | IDENTIFIER OPEN_PARENTHESES optional_expressions CLOSE_PARENTHESES { 
       $$ = add_node(NINGUNO, NINGUNO, (char *)$1, FUNCTION_VALUE, TERM, $3, NULL, NULL, NULL, NULL); 
     }
     ;
-opt_args: arg_lst { $$ = $1; }
+optional_expressions: expression_list { $$ = $1; }
 	  | /* */ { $$ = NULL; }
     ;
-arg_lst: expr ASCII_COMMA arg_lst { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, PARAMETER_VALUE, ARG_LST, $1, $3, NULL, NULL, NULL); 
+expression_list: expression_list COLON expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, PARAMETER_VALUE, ARG_LST, $3, $1, NULL, NULL, NULL); 
     }
 	  | expr { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, PARAMETER_VALUE, ARG_LST, $1, NULL, NULL, NULL, NULL); 
+    }
+    ;
+expresion: expr SMALLER_THAN_SIGN expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, LESSTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
+    }
+    | expr BIGGER_THAN_SIGN expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, GREATTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
+    }
+    | expr EQUAL_SIGN expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, EQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
+    }
+    | expr SMALLER_EQUAL_SIGN expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, LESSEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
+    }
+    | expr BIGGER_EQUAL_SIGN expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, GREATEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
     ;
 %%

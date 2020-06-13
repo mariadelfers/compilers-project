@@ -1,0 +1,6 @@
+program cuatro
+{
+  var x : int
+}
+
+   read x;

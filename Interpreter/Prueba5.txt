@@ -22,5 +22,16 @@ program tres
      set x x + 1;
    }
 
+   ifelse (x < 2*y + 2)
+   {
+     set x x + y;
+     set y 0;
+   }
+   {
+     set y x + 2*x;
+     set x 2;
+   }
+
    print z;
+   print y;
 }
