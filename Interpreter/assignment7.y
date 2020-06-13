@@ -21,14 +21,17 @@ double ftype;
 /* Type nodes of the syntactic tree */
 enum Type_nodes {
   BEGIN, 
-  STATEMENT, 
+  STATEMENT,
+  ASSIGN_STATEMENT, 
   SET, 
   EXPR, 
   TERM, 
   FACTOR, 
   READ, 
   PRINT, 
-  IF, 
+  IF_STATEMENT,
+  ITERATION_STATEMENT,
+  CMP_STATEMENT, 
   EXPRESION, 
   IFELSE, 
   WHILE, 
@@ -54,14 +57,17 @@ enum Type_nodes {
 /* Name of types node of the syntactic tree */
 char* Type_node_label[] = {
   "BEGIN",
-  "STATEMENT", 
+  "STATEMENT",
+  "ASSIGN_STATEMENT", 
   "SET", 
   "EXPR", 
   "TERM", 
   "FACTOR", 
   "READ", 
   "PRINT", 
-  "IF", 
+  "IF_STATEMENT",
+  "ITERATION_STATEMENT",
+  "CMP_STATEMENT",  
   "EXPRESION", 
   "IFELSE", 
   "WHILE", 
@@ -150,6 +156,10 @@ void aux_function(struct SyntacticNode*);
 /* Types */
 %type <syntatic_type> program
 %type <syntatic_type> statement
+%type <syntatic_type> assign_statement
+%type <syntatic_type> if_statement
+%type <syntatic_type> iteration_statement
+%type <syntatic_type> cmp_statement
 %type <syntatic_type> optional_statements
 %type <syntatic_type> statement_list
 %type <syntatic_type> expr
