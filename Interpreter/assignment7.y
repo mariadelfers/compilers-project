@@ -20,33 +20,29 @@ extern FILE *yyin;
 double ftype;
 /* Type nodes of the syntactic tree */
 enum Type_nodes {
-  BEGIN, 
+  PROGRAM, 
   STATEMENT,
+  STATEMENT_LIST,
   ASSIGN_STATEMENT, 
-  SET, 
+  IF_STATEMENT,
+  IFELSE_STATEMENT,
+  ITERATION_STATEMENT,
+  CMP_STATEMENT, 
   EXPR, 
   TERM, 
   FACTOR, 
+  EXPRESION, 
+  SET,
   READ, 
   PRINT,
   IF, 
-  IF_STATEMENT,
   IFELSE, 
-  IFELSE_STATEMENT,
   FOR,
-  ITERATION_STATEMENT,
-  CMP_STATEMENT, 
-  EXPRESION, 
-  WHILE, 
-  STATEMENT_LIST, 
-  ADD, 
-  SUBSTRACT, 
-  MULTIPLY, 
-  SLASH, 
-  LESSTHAN, 
-  GREATTHAN, 
-  LESSEQUAL, 
-  GREATEQUAL,
+  WHILE,  
+  PLUS, 
+  MINUS, 
+  MULTIPLICATION, 
+  DIVIDE,
   SMALLER_THAN,
   BIGGER_THAN,
   EQUAL,
@@ -57,41 +53,36 @@ enum Type_nodes {
   ID_VALUE, 
   FUNCTION_VALUE, 
   PARAMETER_VALUE, 
-  ARG_LST, 
   RETURN
 };
 /* Name of types node of the syntactic tree */
 char* Type_node_label[] = {
-  "BEGIN",
+  "PROGRAM", 
   "STATEMENT",
+  "STATEMENT_LIST",
   "ASSIGN_STATEMENT", 
-  "SET", 
+  "IF_STATEMENT",
+  "IFELSE_STATEMENT",
+  "ITERATION_STATEMENT",
+  "CMP_STATEMENT", 
   "EXPR", 
   "TERM", 
   "FACTOR", 
+  "EXPRESION", 
+  "SET",
   "READ", 
   "PRINT",
   "IF", 
-  "IF_STATEMENT",
   "IFELSE", 
-  "IFELSE_STATEMENT",
   "FOR",
-  "ITERATION_STATEMENT",
-  "CMP_STATEMENT",  
-  "EXPRESION", 
-  "WHILE", 
-  "STATEMENT_LIST", 
-  "ADD", 
-  "SUBSTRACT", 
-  "MULTIPLY", 
-  "SLASH", 
-  "LESSTHAN", 
-  "GREATTHAN",  
-  "LESSEQUAL", 
-  "GREATEQUAL",
+  "WHILE",  
+  "PLUS", 
+  "MINUS", 
+  "MULTIPLICATION", 
+  "DIVIDE",
   "SMALLER_THAN",
   "BIGGER_THAN",
-  "EQUAL_SIGN",
+  "EQUAL",
   "SMALLER_EQUAL",
   "BIGGER_EQUAL",
   "VALOR_INT_", 
@@ -99,7 +90,6 @@ char* Type_node_label[] = {
   "ID_VALUE", 
   "FUNCTION_VALUE", 
   "PARAMETER_VALUE", 
-  "ARG_LST", 
   "RETURN"
 };
 
@@ -216,7 +206,7 @@ void aux_function(struct SyntacticNode*);
 program: PROGRAM_R IDENTIFIER OPEN_BRACKET optional_declarations optional_function_declarations 
 CLOSE_BRACKET statement {
     struct SyntacticNode* raiz_Arbol_Sintactico;
-    raiz_Arbol_Sintactico = add_node(NINGUNO, NINGUNO, NULL, BEGIN, NINGUNO, $7, NULL, NULL, NULL, NULL);
+    raiz_Arbol_Sintactico = add_node(NINGUNO, NINGUNO, NULL, PROGRAM, NINGUNO, $7, NULL, NULL, NULL, NULL);
     //print_tree(raiz_Arbol_Sintactico, "main");
     //display_table(function_head, "main");
     //printf(" OUTPUT \n\n");
@@ -292,8 +282,8 @@ iteration_statement: WHILE_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statem
     | FOR_R SET_R IDENTIFIER expr TO_R expr STEP_R expr DO_R statement {
       struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$3, ID_VALUE, FOR, NULL, NULL, NULL, NULL, NULL);
       struct SyntacticNode* setNode = add_node(NINGUNO, NINGUNO, NULL, SET, FOR, idNode, $4, NULL, NULL, NULL);
-      struct SyntacticNode* ltNode = add_node(NINGUNO, NINGUNO, NULL, LESSEQUAL, EXPRESION, idNode, $6, NULL, NULL, NULL);
-      struct SyntacticNode* stepNode = add_node(NINGUNO, NINGUNO, NULL, ADD, EXPR, idNode, $8, NULL, NULL, NULL);
+      struct SyntacticNode* ltNode = add_node(NINGUNO, NINGUNO, NULL, SMALLER_EQUAL, EXPRESION, idNode, $6, NULL, NULL, NULL);
+      struct SyntacticNode* stepNode = add_node(NINGUNO, NINGUNO, NULL, PLUS, EXPR, idNode, $8, NULL, NULL, NULL);
       struct SyntacticNode* setNode2 = add_node(NINGUNO, NINGUNO, NULL, SET, FOR, idNode, stepNode, NULL, NULL, NULL);
       $$ = add_node(NINGUNO, NINGUNO, NULL, FOR, ITERATION_STATEMENT, setNode, ltNode, setNode2, $10, NULL);
     }
@@ -307,18 +297,18 @@ statement_list: statement { $$ = $1; }
     }
     ;
 expr: expr PLUS_SIGN term { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, ADD, EXPR, $1, $3, NULL, NULL, NULL); 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, PLUS, EXPR, $1, $3, NULL, NULL, NULL); 
     }
 	  | expr MINUS_SIGN term { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, SUBSTRACT, EXPR, $1, $3, NULL, NULL, NULL); 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, MINUS, EXPR, $1, $3, NULL, NULL, NULL); 
     }
 	  | term { $$ = $1; }
     ;
 term: term MULTIPLICATION_SIGN factor { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, MULTIPLY, TERM, $1, $3, NULL, NULL, NULL); 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, MULTIPLICATION, TERM, $1, $3, NULL, NULL, NULL); 
     }
     | term DIVISION_SIGN factor { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, SLASH, TERM, $1, $3, NULL, NULL, NULL); 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, DIVIDE, TERM, $1, $3, NULL, NULL, NULL); 
     }
     | factor { $$ = $1; }
     ; 
@@ -347,19 +337,19 @@ expression_list: expression_list COLON expr {
     }
     ;
 expresion: expr SMALLER_THAN_SIGN expr { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, LESSTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, SMALLER_THAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
     | expr BIGGER_THAN_SIGN expr { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, GREATTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, BIGGER_THAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
     | expr EQUAL_SIGN expr { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, EQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
     | expr SMALLER_EQUAL_SIGN expr { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, LESSEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, SMALLER_EQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
     | expr BIGGER_EQUAL_SIGN expr { 
-      $$ = add_node(NINGUNO, NINGUNO, NULL, GREATEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, BIGGER_EQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
     }
     ;
 %%
@@ -667,16 +657,16 @@ void display_tree(struct SyntacticNode* node){
 */
 int int_expression(struct SyntacticNode* node){
   assert(node != NULL);
-  if(node->node_type == ADD){ 
+  if(node->node_type == PLUS){ 
     return int_expression(node->array_ptr[0]) + int_expression(node->array_ptr[1]);
   } 
-  else if(node->node_type == SUBSTRACT){ 
+  else if(node->node_type == MINUS){ 
     return int_expression(node->array_ptr[0]) - int_expression(node->array_ptr[1]);
   } 
-  else if(node->node_type == MULTIPLY){ 
+  else if(node->node_type == MULTIPLICATION){ 
     return int_expression(node->array_ptr[0]) * int_expression(node->array_ptr[1]);
   } 
-  else if(node->node_type == SLASH){ 
+  else if(node->node_type == DIVIDE){ 
     return int_expression(node->array_ptr[0]) / int_expression(node->array_ptr[1]); 
   }
   
@@ -704,16 +694,16 @@ int int_expression(struct SyntacticNode* node){
 */
 double float_expression(struct SyntacticNode* node){
   assert(node != NULL);
-  if(node->node_type == ADD){ 
+  if(node->node_type == PLUS){ 
     return float_expression(node->array_ptr[0]) + float_expression(node->array_ptr[1]);
   } 
-  else if(node->node_type == SUBSTRACT){ 
+  else if(node->node_type == MINUS){ 
     return float_expression(node->array_ptr[0]) - float_expression(node->array_ptr[1]);
   } 
-  else if(node->node_type == MULTIPLY){ 
+  else if(node->node_type == MULTIPLICATION){ 
     return float_expression(node->array_ptr[0]) * float_expression(node->array_ptr[1]);
   } 
-  else if(node->node_type == SLASH){ 
+  else if(node->node_type == DIVIDE){ 
     return float_expression(node->array_ptr[0]) / float_expression(node->array_ptr[1]); 
   }
   assert(node->node_type == ID_VALUE || node-> node_type == VALOR_FLOAT_ || node-> node_type == FUNCTION_VALUE);
@@ -956,15 +946,15 @@ int expression_function(struct SyntacticNode* node){
     int int_left = int_expression(node->array_ptr[0]);
     int int_rigth = int_expression(node->array_ptr[1]);
     switch(node->node_type){
-      case LESSTHAN:
+      case SMALLER_THAN:
         return int_left < int_rigth;
-      case GREATTHAN:
+      case BIGGER_THAN:
         return int_left > int_rigth;
       case EQUAL:
         return int_left == int_rigth;
-      case LESSEQUAL:
+      case SMALLER_EQUAL:
         return int_left <= int_rigth;
-      case GREATEQUAL:
+      case BIGGER_EQUAL:
         return int_left >= int_rigth;
     }
   }
@@ -974,15 +964,15 @@ int expression_function(struct SyntacticNode* node){
     double float_left = float_expression(node->array_ptr[0]);
     int float_rigth = float_expression(node->array_ptr[1]);
     switch(node->node_type){
-      case LESSTHAN:
+      case SMALLER_THAN:
         return float_left < float_rigth;
-      case GREATTHAN:
+      case BIGGER_THAN:
         return float_left > float_rigth;
       case EQUAL:
         return float_left == float_rigth;
-      case LESSEQUAL:
+      case SMALLER_EQUAL:
         return float_left <= float_rigth;
-      case GREATEQUAL:
+      case BIGGER_EQUAL:
         return float_left >= float_rigth;
     }
   }
@@ -1125,7 +1115,7 @@ void cover_tree(struct SyntacticNode* nodo){
   if(current_function() && get_flag()) return;
 
   switch(nodo->node_type){
-  	case BEGIN:
+  	case PROGRAM:
       break;
 
     case PRINT:
