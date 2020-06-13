@@ -2,7 +2,7 @@ program tres
 {
    var x : int;
    var y : int;
-   var z: int
+   var z : int
 }
 {
    read x;
@@ -16,7 +16,7 @@ program tres
    }
 
    set z 0;
-   while (x < y) do
+   while (x < y)
    {
      set z z + y;
      set x x + 1;
