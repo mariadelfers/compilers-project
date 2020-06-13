@@ -159,8 +159,9 @@ void aux_function(struct SyntacticNode*);
 %type <syntatic_type> if_statement
 %type <syntatic_type> iteration_statement
 %type <syntatic_type> cmp_statement
-%type <syntatic_type> optional_statements
 %type <syntatic_type> statement_list
+%type <syntatic_type> optional_expressions
+%type <syntatic_type> expression_list
 %type <syntatic_type> expr
 %type <syntatic_type> term
 %type <syntatic_type> factor
