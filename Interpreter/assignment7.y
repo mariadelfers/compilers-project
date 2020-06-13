@@ -28,8 +28,12 @@ enum Type_nodes {
   TERM, 
   FACTOR, 
   READ, 
-  PRINT, 
+  PRINT,
+  IF, 
   IF_STATEMENT,
+  IFELSE, 
+  IFELSE_STATEMENT,
+  FOR,
   ITERATION_STATEMENT,
   CMP_STATEMENT, 
   EXPRESION, 
@@ -63,8 +67,12 @@ char* Type_node_label[] = {
   "TERM", 
   "FACTOR", 
   "READ", 
-  "PRINT", 
+  "PRINT",
+  "IF", 
   "IF_STATEMENT",
+  "IFELSE", 
+  "IFELSE_STATEMENT",
+  "FOR",
   "ITERATION_STATEMENT",
   "CMP_STATEMENT",  
   "EXPRESION", 
@@ -265,22 +273,22 @@ assign_statement: SET_R IDENTIFIER  expr  SEMICOLON{
     }
     ;
 if_statement: IF_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement {
-      $$ = add_node(NOTHING, NOTHING, NULL, IF, IF_STATEMENT, $3, $5, NULL, NULL, NULL);
+      $$ = add_node(NINGUNO, NINGUNO, NULL, IF, IF_STATEMENT, $3, $5, NULL, NULL, NULL);
     }
     | IF_ELSE_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement statement {
-      $$ = add_node(NOTHING, NOTHING, NULL, IFELSE, IFELSE_STATEMENT, $3, $5, $6, NULL, NULL);
+      $$ = add_node(NINGUNO, NINGUNO, NULL, IFELSE, IFELSE_STATEMENT, $3, $5, $6, NULL, NULL);
     }
     ;
 iteration_statement: WHILE_R OPEN_PARENTHESES expresion CLOSE_PARENTHESES statement {
-      $$ = add_node(NOTHING, NOTHING, NULL, WHILE, ITERATION_STATEMENT, $3, $5, NULL, NULL, NULL);
+      $$ = add_node(NINGUNO, NINGUNO, NULL, WHILE, ITERATION_STATEMENT, $3, $5, NULL, NULL, NULL);
     }
     | FOR_R SET_R IDENTIFIER expr TO_R expr STEP_R expr DO_R statement {
-      struct SyntaxTreeNode* idNode = add_node(NOTHING, NOTHING, (char *)$3, ID_VALUE, FOR, NULL, NULL, NULL, NULL, NULL);
-      struct SyntaxTreeNode* setNode = add_node(NOTHING, NOTHING, NULL, SET, FOR, idNode, $4, NULL, NULL, NULL);
-      struct SyntaxTreeNode* ltNode = add_node(NOTHING, NOTHING, NULL, LEQ, EXPRESION, idNode, $6, NULL, NULL, NULL);
-      struct SyntaxTreeNode* stepNode = add_node(NOTHING, NOTHING, NULL, PLUS, EXPR, idNode, $8, NULL, NULL, NULL);
-      struct SyntaxTreeNode* setNode2 = add_node(NOTHING, NOTHING, NULL, SET, FOR, idNode, stepNode, NULL, NULL, NULL);
-      $$ = add_node(NOTHING, NOTHING, NULL, FOR, ITERATION_STATEMENT, setNode, ltNode, setNode2, $10, NULL);
+      struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$3, ID_VALUE, FOR, NULL, NULL, NULL, NULL, NULL);
+      struct SyntacticNode* setNode = add_node(NINGUNO, NINGUNO, NULL, SET, FOR, idNode, $4, NULL, NULL, NULL);
+      struct SyntacticNode* ltNode = add_node(NINGUNO, NINGUNO, NULL, SMALLER_EQUAL, EXPRESION, idNode, $6, NULL, NULL, NULL);
+      struct SyntacticNode* stepNode = add_node(NINGUNO, NINGUNO, NULL, ADD, EXPR, idNode, $8, NULL, NULL, NULL);
+      struct SyntacticNode* setNode2 = add_node(NINGUNO, NINGUNO, NULL, SET, FOR, idNode, stepNode, NULL, NULL, NULL);
+      $$ = add_node(NINGUNO, NINGUNO, NULL, FOR, ITERATION_STATEMENT, setNode, ltNode, setNode2, $10, NULL);
     }
     ;
 cmp_statement: OPEN_BRACKET CLOSE_BRACKET { $$ = NULL; }
@@ -290,7 +298,6 @@ statement_list: statement { $$ = $1; }
     | statement_list statement { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, STATEMENT_LIST, STATEMENT_LIST, $1, $2, NULL, NULL, NULL); 
     }
-	  | 
     ;
 expr: expr PLUS_SIGN term { 
       $$ = add_node(NINGUNO, NINGUNO, NULL, ADD, EXPR, $1, $3, NULL, NULL, NULL); 
