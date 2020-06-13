@@ -21,7 +21,7 @@ double ftype;
 /* Type nodes of the syntactic tree */
 enum Type_nodes {
   BEGIN, 
-  STMT, 
+  STATEMENT, 
   SET, 
   EXPR, 
   TERM, 
@@ -32,7 +32,7 @@ enum Type_nodes {
   EXPRESION, 
   IFELSE, 
   WHILE, 
-  STMT_LST, 
+  STATEMENT_LIST, 
   ADD, 
   SUBSTRACT, 
   MULTIPLY, 
@@ -54,7 +54,7 @@ enum Type_nodes {
 /* Name of types node of the syntactic tree */
 char* Type_node_label[] = {
   "BEGIN",
-  "STMT", 
+  "STATEMENT", 
   "SET", 
   "EXPR", 
   "TERM", 
@@ -65,7 +65,7 @@ char* Type_node_label[] = {
   "EXPRESION", 
   "IFELSE", 
   "WHILE", 
-  "STMT_LST", 
+  "STATEMENT_LIST", 
   "ADD", 
   "SUBSTRACT", 
   "MULTIPLY", 
@@ -108,8 +108,8 @@ void aux_function(struct SyntacticNode*);
   int itype; 
   double ftype; 
   char* id_name; 
-  struct SyntacticNode* arbol_valor; 
-  struct SymbolTable* tabla_De_Simbolos_Valor; 
+  struct SyntacticNode* syntatic_type; 
+  struct SymbolTable* table_type; 
 }
 /* Tokens */
 %token RETURN_BEGIN
@@ -143,155 +143,184 @@ void aux_function(struct SyntacticNode*);
 %token ASCII_COMMA
 %token RETURN_RETURN
 /* Types */
-%type <arbol_valor> prog
-%type <arbol_valor> stmt
-%type <arbol_valor> opt_stmts
-%type <arbol_valor> stmt_lst
-%type <arbol_valor> expr
-%type <arbol_valor> term
-%type <arbol_valor> factor
-%type <arbol_valor> expresion
-%type <arbol_valor> RETURN_BEGIN
-%type <arbol_valor> RETURN_END 
-%type <arbol_valor> RETURN_VARIABLE
-%type <arbol_valor> ASCII_SET
-%type <arbol_valor> RETURN_READ
-%type <arbol_valor> RETURN_PRINT
-%type <arbol_valor> RETURN_IF
-%type <arbol_valor> RETURN_IFELSE 
-%type <arbol_valor> RETURN_WHILE
-%type <arbol_valor> ASCII_ADD
-%type <arbol_valor> ASCII_SUBSTRACT
-%type <arbol_valor> ASCII_MULTIPLY 
-%type <arbol_valor> ASCII_SLASH
-%type <arbol_valor> ASCII_LESSTHAN
-%type <arbol_valor> ASCII_GREATTHAN
-%type <arbol_valor> ASCII_EQUAL
-%type <arbol_valor> ASCII_LESSEQUAL
-%type <arbol_valor> ASCII_GREATEQUAL
-%type <arbol_valor> INTEGER_NUMBER
-%type <arbol_valor> FLOATING_POINT_NUMBER
-%type <arbol_valor> IDENTIFIER
-%type <arbol_valor> ASCII_PARENTHESES_1
-%type <arbol_valor> ASCII_PARENTHESES_2
+%type <syntatic_type> prog
+%type <syntatic_type> statement
+%type <syntatic_type> optional_statements
+%type <syntatic_type> statement_list
+%type <syntatic_type> expr
+%type <syntatic_type> term
+%type <syntatic_type> factor
+%type <syntatic_type> expresion
+%type <syntatic_type> RETURN_BEGIN
+%type <syntatic_type> RETURN_END 
+%type <syntatic_type> RETURN_VARIABLE
+%type <syntatic_type> ASCII_SET
+%type <syntatic_type> RETURN_READ
+%type <syntatic_type> RETURN_PRINT
+%type <syntatic_type> RETURN_IF
+%type <syntatic_type> RETURN_IFELSE 
+%type <syntatic_type> RETURN_WHILE
+%type <syntatic_type> ASCII_ADD
+%type <syntatic_type> ASCII_SUBSTRACT
+%type <syntatic_type> ASCII_MULTIPLY 
+%type <syntatic_type> ASCII_SLASH
+%type <syntatic_type> ASCII_LESSTHAN
+%type <syntatic_type> ASCII_GREATTHAN
+%type <syntatic_type> ASCII_EQUAL
+%type <syntatic_type> ASCII_LESSEQUAL
+%type <syntatic_type> ASCII_GREATEQUAL
+%type <syntatic_type> INTEGER_NUMBER
+%type <syntatic_type> FLOATING_POINT_NUMBER
+%type <syntatic_type> IDENTIFIER
+%type <syntatic_type> ASCII_PARENTHESES_1
+%type <syntatic_type> ASCII_PARENTHESES_2
 %type <itype> tipo
-%type <arbol_valor> opt_args
-%type <arbol_valor> arg_lst
+%type <syntatic_type> opt_args
+%type <syntatic_type> arg_lst
 
 %%
 
-/* Gramatic */
-prog: opt_decls opt_fun_decls RETURN_BEGIN opt_stmts RETURN_END {
+prog: optional_declarations  optional_function_declarations RETURN_BEGIN optional_statements RETURN_END {
     struct SyntacticNode* raiz_Arbol_Sintactico;
     raiz_Arbol_Sintactico = add_node(NINGUNO, NINGUNO, NULL, BEGIN, NINGUNO, $4, NULL, NULL, NULL, NULL);
     print_tree(raiz_Arbol_Sintactico, "main");
     display_table(function_head, "main");
     printf(" OUTPUT \n\n");
     cover_tree(raiz_Arbol_Sintactico);
-};
+    };
+optional_declarations: declarations  
+    | /* */ 
+    ;
+declarations: declaration ASCII_SCOLON declarations  
+    | declaration
+    ;
+declaration: RETURN_VARIABLE IDENTIFIER ASCII_COLON type { 
+      insert_table(&function_head, (char*)$2, $4, NINGUNO, NULL, NULL); 
+    };
+type: RETURN_INT { $$ = VALOR_INT_; }
+    | RETURN_FLOAT { $$ = VALOR_FLOAT_; }
+    ;
+optional_function_declarations: function_declarations 
+    | /* */
+    ;
+function_declarations: function_declaration ASCII_SCOLON function_declarations 
+    | function_declaration
+    ;
+function_declaration: RETURN_FUNCTION IDENTIFIER ASCII_PARENTHESES_1 optional_params ASCII_PARENTHESES_2 ASCII_COLON type optional_declarations_for_function RETURN_BEGIN optional_statements RETURN_END {
+      insert_table(&function_head, (char*)$2, FUNCTION_VALUE, $7, table_head, $10);
+	    table_head = NULL;
+    };
+optional_params: param_list 
+    | /* */
+    ;
+param_list: param ASCII_COMMA param_list 
+    | param
+    ;
+param: IDENTIFIER ASCII_COLON type { 
+      insert_table(&table_head, (char*)$1, $3, NINGUNO, NULL, NULL); 
+    };
+optional_declarations_for_function: declarations_for_function 
+    | /* */
+    ;
+declarations_for_function: declaration_for_function ASCII_SCOLON declarations_for_function 
+    | declaration_for_function
+    ;
+declaration_for_function: RETURN_VARIABLE IDENTIFIER ASCII_COLON type { 
+      insert_table(&table_head, (char*)$2, $4, NINGUNO, NULL, NULL); 
+    };
 
-opt_decls: decls | /* */ 
-;
-
-decls: dec ASCII_SCOLON decls | dec 
-;
-
-dec: RETURN_VARIABLE IDENTIFIER ASCII_COLON tipo { insert_table(&function_head, (char*)$2, $4, NINGUNO, NULL, NULL); }
-;
-
-tipo: RETURN_INT
-	 { $$ = VALOR_INT_; }
-	 | RETURN_FLOAT
-	 { $$ = VALOR_FLOAT_; }
-;
-
-opt_fun_decls: fun_decls | /* */
-;
-
-fun_decls: fun_dec ASCII_SCOLON fun_decls | fun_dec
-;
-
-fun_dec: RETURN_FUNCTION IDENTIFIER ASCII_PARENTHESES_1 opt_params ASCII_PARENTHESES_2 ASCII_COLON tipo opt_decls_for_function RETURN_BEGIN opt_stmts RETURN_END
-	{
-	insert_table(&function_head, (char*)$2, FUNCTION_VALUE, $7, table_head, $10);
-	table_head = NULL;
-	}
-;
-
-opt_params: param_lst | /* */
-;
-
-param_lst: param ASCII_COMMA param_lst | param
-;
-
-param: IDENTIFIER ASCII_COLON tipo { insert_table(&table_head, (char*)$1, $3, NINGUNO, NULL, NULL); }
-;
-
-opt_decls_for_function: decls_for_function | /* */
-;
-
-decls_for_function: dec_for_function ASCII_SCOLON decls_for_function | dec_for_function
-;
-
-dec_for_function: RETURN_VARIABLE IDENTIFIER ASCII_COLON tipo { insert_table(&table_head, (char*)$2, $4, NINGUNO, NULL, NULL); }
-;
-
-stmt: IDENTIFIER ASCII_SET expr 
-	 { struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$1, ID_VALUE, SET, NULL, NULL, NULL, NULL, NULL);
-	  $$ = add_node(NINGUNO, NINGUNO, NULL, SET, STMT, idNode, $3, NULL, NULL, NULL);    
-	 }
-	| RETURN_IF ASCII_PARENTHESES_1 expresion ASCII_PARENTHESES_2 stmt { $$ = add_node(NINGUNO, NINGUNO, NULL, IF, STMT, $3, $5, NULL, NULL, NULL); }
-	| RETURN_IFELSE ASCII_PARENTHESES_1 expresion ASCII_PARENTHESES_2 stmt stmt { $$ = add_node(NINGUNO, NINGUNO, NULL, IFELSE, STMT, $3, $5, $6, NULL, NULL); }
-	| RETURN_WHILE ASCII_PARENTHESES_1 expresion ASCII_PARENTHESES_2 stmt { $$ = add_node(NINGUNO, NINGUNO, NULL, WHILE, STMT, $3, $5, NULL, NULL, NULL); }
-	| RETURN_READ IDENTIFIER
-	{ struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$2, ID_VALUE, READ, NULL, NULL, NULL, NULL, NULL);
-	 $$ = add_node(NINGUNO, NINGUNO, NULL, READ, STMT, idNode, NULL, NULL, NULL, NULL);                  
-	}
-	| RETURN_PRINT expr { $$ = add_node(NINGUNO, NINGUNO, NULL, PRINT, STMT, $2, NULL, NULL, NULL, NULL); }
-	| RETURN_BEGIN opt_stmts RETURN_END { $$ = $2; }
-	| RETURN_RETURN expr { $$ = add_node(NINGUNO, NINGUNO, NULL, RETURN, STMT, $2, NULL, NULL, NULL, NULL); }
-;
-
-opt_stmts: stmt_lst { $$ = $1; }
-	| /* */ { $$ = NULL; }
-;
-
-stmt_lst: stmt ASCII_SCOLON stmt_lst { $$ = add_node(NINGUNO, NINGUNO, NULL, STMT_LST, STMT_LST, $3, $1, NULL, NULL, NULL); }
-	| stmt { $$ = $1; }
-;
-
+statement: IDENTIFIER ASCII_SET expr { 
+      struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$1, ID_VALUE, SET, NULL, NULL, NULL, NULL, NULL);
+	    $$ = add_node(NINGUNO, NINGUNO, NULL, SET, STATEMENT, idNode, $3, NULL, NULL, NULL); 
+    }
+	  | RETURN_IF ASCII_PARENTHESES_1 expresion ASCII_PARENTHESES_2 statement { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, IF, STATEMENT, $3, $5, NULL, NULL, NULL); 
+    }
+	  | RETURN_IFELSE ASCII_PARENTHESES_1 expresion ASCII_PARENTHESES_2 statement statement { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, IFELSE, STATEMENT, $3, $5, $6, NULL, NULL); 
+    }
+	  | RETURN_WHILE ASCII_PARENTHESES_1 expresion ASCII_PARENTHESES_2 statement { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, WHILE, STATEMENT, $3, $5, NULL, NULL, NULL); 
+    }
+	  | RETURN_READ IDENTIFIER { 
+      struct SyntacticNode* idNode = add_node(NINGUNO, NINGUNO, (char *)$2, ID_VALUE, READ, NULL, NULL, NULL, NULL, NULL);
+	    $$ = add_node(NINGUNO, NINGUNO, NULL, READ, STATEMENT, idNode, NULL, NULL, NULL, NULL);                  
+	  }
+    | RETURN_PRINT expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, PRINT, STATEMENT, $2, NULL, NULL, NULL, NULL); 
+    }
+    | RETURN_BEGIN optional_statements RETURN_END { 
+      $$ = $2; 
+    }
+    | RETURN_RETURN expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, RETURN, STATEMENT, $2, NULL, NULL, NULL, NULL); 
+    }
+    ;
+optional_statements: statement_list { $$ = $1; }
+	  | /* */ { $$ = NULL; }
+    ;
+statement_list: statement ASCII_SCOLON statement_list { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, STATEMENT_LIST, STATEMENT_LIST, $3, $1, NULL, NULL, NULL); 
+    }
+	  | statement { $$ = $1; }
+    ;
 expresion: expr { $$ = 1; }
-	| expr ASCII_LESSTHAN expr { $$ = add_node(NINGUNO, NINGUNO, NULL, LESSTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); }
-	| expr ASCII_GREATTHAN expr { $$ = add_node(NINGUNO, NINGUNO, NULL, GREATTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); }
-	| expr ASCII_EQUAL expr { $$ = add_node(NINGUNO, NINGUNO, NULL, EQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); }
-	| expr ASCII_LESSEQUAL expr { $$ = add_node(NINGUNO, NINGUNO, NULL, LESSEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); }
-	| expr ASCII_GREATEQUAL expr { $$ = add_node(NINGUNO, NINGUNO, NULL, GREATEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); }
-;
-
-expr: expr ASCII_ADD term { $$ = add_node(NINGUNO, NINGUNO, NULL, ADD, EXPR, $1, $3, NULL, NULL, NULL); }
-	| expr ASCII_SUBSTRACT term { $$ = add_node(NINGUNO, NINGUNO, NULL, SUBSTRACT, EXPR, $1, $3, NULL, NULL, NULL); }
-	| term { $$ = $1; }
-;
-
-term: term ASCII_MULTIPLY factor { $$ = add_node(NINGUNO, NINGUNO, NULL, MULTIPLY, TERM, $1, $3, NULL, NULL, NULL); }
-	| term ASCII_SLASH factor { $$ = add_node(NINGUNO, NINGUNO, NULL, SLASH, TERM, $1, $3, NULL, NULL, NULL); }
-	| factor { $$ = $1; }
-; 
-
+    | expr ASCII_LESSTHAN expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, LESSTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
+    }
+    | expr ASCII_GREATTHAN expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, GREATTHAN, EXPRESION, $1, $3, NULL, NULL, NULL); 
+    }
+    | expr ASCII_EQUAL expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, EQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
+    }
+    | expr ASCII_LESSEQUAL expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, LESSEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
+    }
+    | expr ASCII_GREATEQUAL expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, GREATEQUAL, EXPRESION, $1, $3, NULL, NULL, NULL); 
+    }
+    ;
+expr: expr ASCII_ADD term { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, ADD, EXPR, $1, $3, NULL, NULL, NULL); 
+    }
+	  | expr ASCII_SUBSTRACT term { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, SUBSTRACT, EXPR, $1, $3, NULL, NULL, NULL); 
+    }
+	  | term { $$ = $1; }
+    ;
+term: term ASCII_MULTIPLY factor { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, MULTIPLY, TERM, $1, $3, NULL, NULL, NULL); 
+    }
+    | term ASCII_SLASH factor { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, SLASH, TERM, $1, $3, NULL, NULL, NULL); 
+    }
+    | factor { $$ = $1; }
+    ; 
 factor: ASCII_PARENTHESES_1 expr ASCII_PARENTHESES_2 { $$ = $2; }
-	| IDENTIFIER { $$ = add_node(NINGUNO, NINGUNO, (char *)$1, ID_VALUE, FACTOR, NULL, NULL, NULL, NULL, NULL); }
-	| INTEGER_NUMBER { $$ = add_node((int)$1, NINGUNO, NULL, VALOR_INT_, TERM, NULL, NULL, NULL, NULL, NULL); }
-	| FLOATING_POINT_NUMBER{ $$ = add_node(NINGUNO, ftype, NULL, VALOR_FLOAT_, TERM, NULL, NULL, NULL, NULL, NULL); }
-	| IDENTIFIER ASCII_PARENTHESES_1 opt_args ASCII_PARENTHESES_2 { $$ = add_node(NINGUNO, NINGUNO, (char *)$1, FUNCTION_VALUE, TERM, $3, NULL, NULL, NULL, NULL); }
-;
-
+    | IDENTIFIER { 
+      $$ = add_node(NINGUNO, NINGUNO, (char *)$1, ID_VALUE, FACTOR, NULL, NULL, NULL, NULL, NULL); 
+    }
+    | INTEGER_NUMBER { 
+      $$ = add_node((int)$1, NINGUNO, NULL, VALOR_INT_, TERM, NULL, NULL, NULL, NULL, NULL); 
+    }
+    | FLOATING_POINT_NUMBER{ 
+      $$ = add_node(NINGUNO, ftype, NULL, VALOR_FLOAT_, TERM, NULL, NULL, NULL, NULL, NULL); 
+    }
+    | IDENTIFIER ASCII_PARENTHESES_1 opt_args ASCII_PARENTHESES_2 { 
+      $$ = add_node(NINGUNO, NINGUNO, (char *)$1, FUNCTION_VALUE, TERM, $3, NULL, NULL, NULL, NULL); 
+    }
+    ;
 opt_args: arg_lst { $$ = $1; }
-	| /* */ { $$ = NULL; }
-;
-
-arg_lst: expr ASCII_COMMA arg_lst { $$ = add_node(NINGUNO, NINGUNO, NULL, PARAMETER_VALUE, ARG_LST, $1, $3, NULL, NULL, NULL); }
-	| expr { $$ = add_node(NINGUNO, NINGUNO, NULL, PARAMETER_VALUE, ARG_LST, $1, NULL, NULL, NULL, NULL); }
-;
+	  | /* */ { $$ = NULL; }
+    ;
+arg_lst: expr ASCII_COMMA arg_lst { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, PARAMETER_VALUE, ARG_LST, $1, $3, NULL, NULL, NULL); 
+    }
+	  | expr { 
+      $$ = add_node(NINGUNO, NINGUNO, NULL, PARAMETER_VALUE, ARG_LST, $1, NULL, NULL, NULL, NULL); 
+    }
+    ;
 %%
 
 /* Error codes */
