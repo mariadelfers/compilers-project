@@ -1,0 +1,23 @@
+program once
+{
+	var x : int
+	fun factorial (var x: int) : int
+	{var i : int;
+	var r : int }
+		{
+			set r 1;
+			ifelse (x < 0) return 0 - 1;
+			{
+				ifelse (x <= 1) return 1;
+				{
+					for set i 1 to x step 1 do
+						set r r * i;
+					return r;
+				}
+			}
+		}
+}
+{
+	read x;
+	print factorial(x);
+}

@@ -2,9 +2,9 @@ FLEX=flex
 BISON=bison
 CC=gcc
 
-PROGRAM = assignment7
-LEX = assignment7.l
-PARSER = assignment7.y
+PROGRAM=compiler
+LEX=compiler.l
+PARSER = compiler.y
 
 $(PROGRAM): $(LEX) $(PARSER)
 	$(FLEX) $(LEX)

@@ -1,0 +1,18 @@
+program once
+{
+	var x : int
+	
+	fun factorial (var x: int) : int
+	{}
+	{
+		ifelse(x < 0) return 0 - 1;
+		{
+			ifelse(x <= 1)return 1;
+			return factorial(x - 1) * x;	
+		}
+	}
+}
+{
+	read x;
+	print factorial(x);
+}

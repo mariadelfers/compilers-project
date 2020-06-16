@@ -1,0 +1,28 @@
+program diez
+{
+	var x : int;
+	var y: int
+	fun ff (var x: int, var y: int) : int;
+	fun gg (var x: int, var y: int) : int {var w : int}
+	{
+		if(y > 0) {
+			set w ff(x, y - 1);
+			return w * 2;
+		}
+		return x;
+	}
+	fun ff(var x: int, var y: int): int
+	{
+		var w : int	
+	}
+	{
+		set w x + y;
+		set w w + 2;
+		return w;
+	}
+}
+{
+	read x;
+	read y;
+	print gg(x, y- 1);
+}
