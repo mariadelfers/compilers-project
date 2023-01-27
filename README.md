@@ -1,10 +1,12 @@
-# Compiler
-Compilers Stuff Project
+# Compilers Proyect
+A compiler built from scratch.
 
 ## Requeriments
-Flex
+ - Flex
 
 ## Run
+```
 lex _file_name_.l
 cc _file_name_.yyc -lfl
 ./a.out
+```
